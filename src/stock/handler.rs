@@ -4,9 +4,15 @@ use actix_web::{post, web, HttpResponse};
 
 #[post("/")]
 async fn add_stock(pool: web::Data<PgPool>, body: web::Json<req::AddStockReq>) -> HttpResponse {
-    match model::Stock::add(pool, body) {
-        Ok(res) => HttpResponse::Ok().json(res),
-        Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),
+    let stock_code = body.code.clone();
+    let stock_exist = model::Stock::check_existence(pool.clone(), stock_code).unwrap();
+
+    match stock_exist {
+        true => HttpResponse::BadRequest().body(format!("Error : Stock Code already exists")),
+        false => match model::Stock::add(pool, body) {
+            Ok(res) => HttpResponse::Ok().json(res),
+            Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),
+        },
     }
 }
 
