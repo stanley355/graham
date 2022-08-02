@@ -1,14 +1,19 @@
+#[macro_use]
+extern crate diesel;
+
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
 use std::env;
 
 mod db;
+mod stock;
+mod schema;
 
 async fn serve_web(address: String, pool: db::PgPool) -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(pool.clone()))
-            .route("/v1/", web::get().to(|| async { "Hello World!" }))
+            .service(web::scope("/v1/stocks").configure(stock::handler::route))
     })
     .bind(address)?
     .run()
