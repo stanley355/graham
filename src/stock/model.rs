@@ -32,4 +32,13 @@ impl Stock {
         let conn = &pool.get().unwrap();
         table.load::<Stock>(conn)
     }
+
+    pub fn get_id(pool: web::Data<PgPool>, stock_code: String) -> QueryResult<i32> {
+        let conn = &pool.get().unwrap();
+
+        table
+            .filter(&code.eq(stock_code))
+            .select(id)
+            .get_result::<i32>(conn)
+    }
 }
