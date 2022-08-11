@@ -2,6 +2,7 @@ table! {
     balance (id) {
         id -> Int4,
         stock_id -> Int4,
+        year -> Int4,
         cash -> Int8,
         receivables -> Int8,
         inventories -> Int8,

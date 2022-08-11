@@ -2,6 +2,7 @@
 CREATE TABLE balance (
   id SERIAL PRIMARY KEY,
   stock_id INTEGER NOT NULL,
+  year INTEGER NOT NULL,
   cash BIGINT NOT NULL,
   receivables BIGINT NOT NULL,
   inventories BIGINT NOT NULL,
