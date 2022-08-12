@@ -3,8 +3,16 @@ use crate::db::PgPool;
 use crate::schema::balance::*;
 
 use actix_web::web;
-use diesel::{ExpressionMethods, QueryResult, RunQueryDsl};
+use diesel::{
+    dsl::exists, select, BoolExpressionMethods, ExpressionMethods, QueryDsl, QueryResult,
+    RunQueryDsl,
+};
 use serde::{Deserialize, Serialize};
+
+pub struct BalanceIdentifier {
+    pub stock_id: i32,
+    pub year: i32,
+}
 
 #[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
 pub struct Balance {
@@ -29,6 +37,18 @@ pub struct Balance {
 }
 
 impl Balance {
+    pub fn check_existence(
+        pool: web::Data<PgPool>,
+        payload: BalanceIdentifier,
+    ) -> QueryResult<bool> {
+        let conn = &pool.get().unwrap();
+
+        select(exists(dsl::balance.filter(
+            stock_id.eq(&payload.stock_id).and(year.eq(&payload.year)),
+        )))
+        .get_result(conn)
+    }
+
     pub fn add(
         pool: web::Data<PgPool>,
         body: web::Json<req::AddBalanceReq>,

@@ -8,11 +8,25 @@ async fn add_balance(pool: web::Data<PgPool>, body: web::Json<req::AddBalanceReq
     let stock_id = Stock::get_id(pool.clone(), body.code.clone());
 
     match stock_id {
-        Ok(id) => match model::Balance::add(pool, body, id) {
-            Ok(res) => HttpResponse::Ok().json(res),
-            Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),
-        },
-        Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),
+        Ok(id) => {
+            let balance_identifier = model::BalanceIdentifier {
+                stock_id: id,
+                year: body.year.clone(),
+            };
+            let balance_exist = model::Balance::check_existence(pool.clone(), balance_identifier);
+
+            match balance_exist.unwrap() {
+                true => HttpResponse::BadRequest().body(format!("Error : Balance Sheet exists!")),
+                false => match model::Balance::add(pool, body, id) {
+                    Ok(res) => HttpResponse::Ok().json(res),
+                    Err(err) => {
+                        HttpResponse::InternalServerError().body(format!("Error {:?}", err))
+                    }
+                },
+            }
+        }
+
+        Err(err) => HttpResponse::BadRequest().body(format!("Error Stock ID {:?}", err)),
     }
 }
 
