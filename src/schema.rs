@@ -22,6 +22,23 @@ table! {
 }
 
 table! {
+    income (id) {
+        id -> Int4,
+        stock_id -> Int4,
+        year -> Int4,
+        revenue -> Int8,
+        gross_profit -> Int8,
+        operating_profit -> Int8,
+        net_profit -> Int8,
+        customer_cashflow -> Int8,
+        operating_cashflow -> Int8,
+        investing_cashflow -> Int8,
+        financing_cashflow -> Int8,
+        total_cashflow -> Int8,
+    }
+}
+
+table! {
     stocks (id) {
         id -> Int4,
         code -> Varchar,
@@ -30,8 +47,10 @@ table! {
 }
 
 joinable!(balance -> stocks (stock_id));
+joinable!(income -> stocks (stock_id));
 
 allow_tables_to_appear_in_same_query!(
     balance,
+    income,
     stocks,
 );
