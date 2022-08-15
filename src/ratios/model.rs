@@ -11,15 +11,16 @@ pub struct PerShareRatios {
     pub id: i32,
     pub stock_id: i32,
     pub year: i32,
-    pub cash_equity: i64,
-    pub quick_equity: i64,
-    pub current_equity: i64,
-    pub tangible_equity: i64,
-    pub gross_profit: i64,
-    pub operating_profit: i64,
-    pub net_profit: i64,
-    pub cashflow: i64,
+    pub cash_equity: Option<i64>,
+    pub quick_equity: Option<i64>,
+    pub current_equity: Option<i64>,
+    pub tangible_equity: Option<i64>,
+    pub gross_profit: Option<i64>,
+    pub operating_profit: Option<i64>,
+    pub net_profit: Option<i64>,
+    pub cashflow: Option<i64>,
 }
+
 
 impl PerShareRatios {
     pub fn add_balance_ratios(

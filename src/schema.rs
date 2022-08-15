@@ -43,14 +43,14 @@ table! {
         id -> Int4,
         stock_id -> Int4,
         year -> Int4,
-        cash_equity -> Int8,
-        quick_equity -> Int8,
-        current_equity -> Int8,
-        tangible_equity -> Int8,
-        gross_profit -> Int8,
-        operating_profit -> Int8,
-        net_profit -> Int8,
-        cashflow -> Int8,
+        cash_equity -> Nullable<Int8>,
+        quick_equity -> Nullable<Int8>,
+        current_equity -> Nullable<Int8>,
+        tangible_equity -> Nullable<Int8>,
+        gross_profit -> Nullable<Int8>,
+        operating_profit -> Nullable<Int8>,
+        net_profit -> Nullable<Int8>,
+        cashflow -> Nullable<Int8>,
     }
 }
 
