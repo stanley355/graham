@@ -7,6 +7,7 @@ use std::env;
 
 mod balance;
 mod db;
+mod income;
 mod schema;
 mod stock;
 
@@ -16,6 +17,7 @@ async fn serve_web(address: String, pool: db::PgPool) -> std::io::Result<()> {
             .app_data(web::Data::new(pool.clone()))
             .service(web::scope("/v1/stocks").configure(stock::handler::route))
             .service(web::scope("/v1/balance").configure(balance::handler::route))
+            .service(web::scope("/v1/income").configure(income::handler::route))
     })
     .bind(address)?
     .run()
