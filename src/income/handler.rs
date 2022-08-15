@@ -14,7 +14,15 @@ async fn add_balance(pool: web::Data<PgPool>, body: web::Json<req::AddIncomeReq>
                 year: body.year.clone(),
             };
             let income_exist = model::Income::check_existence(pool.clone(), income_identifier);
-            HttpResponse::Ok().body(format!("The stock Exist? {:?}", income_exist))
+            match income_exist.unwrap() {
+              true => HttpResponse::BadRequest().body(format!("Error : Income Sheet exists!")),
+              false => match model::Income::add(pool, body, id) {
+                  Ok(res) => HttpResponse::Ok().json(res),
+                  Err(err) => {
+                      HttpResponse::InternalServerError().body(format!("Error {:?}", err))
+                  }
+              },
+          }
         }
 
         Err(err) => HttpResponse::BadRequest().body(format!("Error Stock ID {:?}", err)),
