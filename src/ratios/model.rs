@@ -3,7 +3,7 @@ use crate::db::PgPool;
 use crate::schema::per_share_ratios::*;
 
 use actix_web::web;
-use diesel::{AsChangeset, ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl};
+use diesel::{ExpressionMethods, QueryResult, RunQueryDsl};
 use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
