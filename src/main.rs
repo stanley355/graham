@@ -8,6 +8,7 @@ use std::env;
 mod balance;
 mod db;
 mod income;
+mod ratios;
 mod schema;
 mod stock;
 

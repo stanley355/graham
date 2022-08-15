@@ -43,16 +43,14 @@ table! {
         id -> Int4,
         stock_id -> Int4,
         year -> Int4,
-        balance_id -> Nullable<Int4>,
-        income_id -> Nullable<Int4>,
-        cash_equity -> Nullable<Float8>,
-        quick_equity -> Nullable<Float8>,
-        current_equity -> Nullable<Float8>,
-        tangible_equity -> Nullable<Float8>,
-        gross_profit -> Nullable<Float8>,
-        operating_profit -> Nullable<Float8>,
-        net_profit -> Nullable<Float8>,
-        cashflow -> Nullable<Float8>,
+        cash_equity -> Int8,
+        quick_equity -> Int8,
+        current_equity -> Int8,
+        tangible_equity -> Int8,
+        gross_profit -> Int8,
+        operating_profit -> Int8,
+        net_profit -> Int8,
+        cashflow -> Int8,
     }
 }
 
@@ -66,8 +64,6 @@ table! {
 
 joinable!(balance -> stocks (stock_id));
 joinable!(income -> stocks (stock_id));
-joinable!(per_share_ratios -> balance (balance_id));
-joinable!(per_share_ratios -> income (income_id));
 joinable!(per_share_ratios -> stocks (stock_id));
 
 allow_tables_to_appear_in_same_query!(

@@ -4,8 +4,8 @@ use crate::schema::balance::*;
 
 use actix_web::web;
 use diesel::{
-    dsl::exists, select, BoolExpressionMethods, ExpressionMethods, QueryDsl, QueryResult,
-    RunQueryDsl,
+    dsl::exists, select, BoolExpressionMethods, ExpressionMethods, QueryDsl,
+    QueryResult, RunQueryDsl,
 };
 use serde::{Deserialize, Serialize};
 
