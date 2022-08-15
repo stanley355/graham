@@ -1,6 +1,5 @@
 use crate::balance::{model, req};
 use crate::db::PgPool;
-use crate::ratios::model::PerShareRatios;
 use crate::stock::model::Stock;
 use actix_web::{post, web, HttpResponse};
 
@@ -18,20 +17,10 @@ async fn add_balance(pool: web::Data<PgPool>, body: web::Json<req::AddBalanceReq
 
             match balance_exist.unwrap() {
                 true => HttpResponse::BadRequest().body(format!("Error : Balance Sheet exists!")),
-                false => match model::Balance::add(pool.clone(), body, id) {
-                    Ok(balance) => {
-                        let update_balance_ratios =
-                            PerShareRatios::add_balance_ratios(pool, balance.clone());
-                        println!(
-                            "The balance ratios update: {:?}",
-                            update_balance_ratios.unwrap()
-                        );
-                        HttpResponse::Ok().json(balance)
-                    }
-                    Err(err) => {
-                        HttpResponse::InternalServerError().body(format!("Error {:?}", err))
-                    }
-                },
+                false => {
+                    let insert_result = model::Balance::add(pool, body,id);
+                    HttpResponse::Ok().body(insert_result)
+                }
             }
         }
 

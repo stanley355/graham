@@ -1,11 +1,12 @@
 use crate::balance::req;
 use crate::db::PgPool;
+use crate::ratios::per_share_ratios::PerShareRatios;
 use crate::schema::balance::*;
 
 use actix_web::web;
 use diesel::{
-    dsl::exists, select, BoolExpressionMethods, ExpressionMethods, QueryDsl,
-    QueryResult, RunQueryDsl,
+    dsl::exists, select, BoolExpressionMethods, ExpressionMethods, QueryDsl, QueryResult,
+    RunQueryDsl,
 };
 use serde::{Deserialize, Serialize};
 
@@ -53,7 +54,7 @@ impl Balance {
         pool: web::Data<PgPool>,
         body: web::Json<req::AddBalanceReq>,
         stck_id: i32,
-    ) -> QueryResult<Balance> {
+    ) -> String {
         let conn = &pool.get().unwrap();
 
         let new_quick_asset = &body.cash + &body.receivables;
@@ -81,8 +82,21 @@ impl Balance {
             (&share_outstanding.eq(&body.share_outstanding)),
         );
 
-        diesel::insert_into(dsl::balance)
+        let insert_result = diesel::insert_into(dsl::balance)
             .values(data)
-            .get_result(conn)
+            .get_result::<Balance>(conn);
+
+        match insert_result {
+            Ok(balance) => {
+                let balance_ratios_exist = PerShareRatios::check_existence(pool.clone(), balance.clone());
+                match balance_ratios_exist.unwrap() {
+                    true => PerShareRatios::update_balance_ratios(pool, balance),
+                    false => PerShareRatios::add_balance_ratios(pool, balance),
+                };
+
+                format!("Balance Sheet created successfully")
+            }
+            Err(err) => format!("Error in inserting balance sheet: {:?}", err),
+        }
     }
 }
