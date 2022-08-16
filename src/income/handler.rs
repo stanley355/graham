@@ -4,7 +4,7 @@ use crate::stock::model::{ReportIdentifier, Stock};
 use actix_web::{post, web, HttpResponse};
 
 #[post("/")]
-async fn add_balance(pool: web::Data<PgPool>, body: web::Json<req::AddIncomeReq>) -> HttpResponse {
+async fn add_income(pool: web::Data<PgPool>, body: web::Json<req::AddIncomeReq>) -> HttpResponse {
     let stock_id = Stock::get_id(pool.clone(), body.code.clone());
 
     match stock_id {
@@ -16,7 +16,9 @@ async fn add_balance(pool: web::Data<PgPool>, body: web::Json<req::AddIncomeReq>
             let income_exist = model::Income::check_existence(pool.clone(), identifier);
 
             match income_exist.unwrap() {
-                true => HttpResponse::BadRequest().body(format!("Error : Balance Sheet exists!")),
+                true => {
+                    HttpResponse::BadRequest().body(format!("Error : Income Statement exists!"))
+                }
                 false => {
                     let insert_result = model::Income::add(pool, body, id);
                     HttpResponse::Ok().body(insert_result)
@@ -29,5 +31,5 @@ async fn add_balance(pool: web::Data<PgPool>, body: web::Json<req::AddIncomeReq>
 
 // Routing for hosts
 pub fn route(config: &mut web::ServiceConfig) {
-    config.service(add_balance);
+    config.service(add_income);
 }

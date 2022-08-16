@@ -1,8 +1,8 @@
 use crate::balance::req;
 use crate::db::PgPool;
-use crate::stock::model::ReportIdentifier;
 use crate::ratios::per_share_ratios::PerShareRatios;
 use crate::schema::balance::*;
+use crate::stock::model::ReportIdentifier;
 
 use actix_web::web;
 use diesel::{
@@ -84,21 +84,23 @@ impl Balance {
 
         match insert_result {
             Ok(balance) => {
-                let identifier = ReportIdentifier {
-                    stock_id: balance.stock_id,
-                    year: balance.year
-                };
-                let balance_ratios_exist =
-                    PerShareRatios::check_existence(pool.clone(), identifier);
-                match balance_ratios_exist.unwrap() {
-                    true => PerShareRatios::update_balance_ratios(pool, balance),
-                    false => PerShareRatios::add_balance_ratios(pool, balance),
-                };
-
+                Balance::create_ps_ratios(pool.clone(), balance);
                 format!("Balance Sheet created successfully")
             }
             Err(err) => format!("Error in inserting balance sheet: {:?}", err),
         }
+    }
+
+    pub fn create_ps_ratios(pool: web::Data<PgPool>, balance_sheet: Balance) {
+        let identifier = ReportIdentifier {
+            stock_id: balance_sheet.stock_id,
+            year: balance_sheet.year,
+        };
+        let balance_ratios_exist = PerShareRatios::check_existence(pool.clone(), identifier);
+        match balance_ratios_exist.unwrap() {
+            true => PerShareRatios::update_balance_ratios(pool, balance_sheet),
+            false => PerShareRatios::add_balance_ratios(pool, balance_sheet),
+        };
     }
 
     pub fn get_outstanding_shares(

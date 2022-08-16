@@ -78,9 +78,9 @@ impl Income {
 
                 Income::create_ps_ratios(pool.clone(), income, outstanding_shares.unwrap());
 
-                format!("Balance Sheet created successfully")
+                format!("Income Statement created successfully")
             }
-            Err(err) => format!("Error in inserting balance sheet: {:?}", err),
+            Err(err) => format!("Error in creating Income Statement: {:?}", err),
         }
     }
 
