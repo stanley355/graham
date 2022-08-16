@@ -1,4 +1,5 @@
 use crate::balance::model::Balance;
+use crate::income::model::Income;
 use crate::db::PgPool;
 use crate::schema::per_share_ratios::*;
 
@@ -77,8 +78,54 @@ impl PerShareRatios {
             .get_result::<PerShareRatios>(conn);
 
         match update_result {
-            Ok(_) => println!("Balance Sheet ratios created successfully"),
-            Err(err) => println!("Error in creating Balance Sheet ratios : {:?}", err),
+            Ok(_) => println!("Balance Sheet ratios updated successfully"),
+            Err(err) => println!("Error in updating Balance Sheet ratios : {:?}", err),
+        }
+    }
+
+    pub fn add_income_ratios(pool: web::Data<PgPool>, body: Income, shares: i64) {
+        let conn = &pool.get().unwrap();
+
+        let data = (
+            (stock_id.eq(&body.stock_id)),
+            (year.eq(&body.year)),
+            (gross_profit.eq(&body.gross_profit / shares)),
+            (operating_profit.eq(&body.operating_profit / shares)),
+            (net_profit.eq(&body.net_profit / shares)),
+            (cashflow.eq(&body.total_cashflow / shares)),
+        );
+
+        let insert_result = diesel::insert_into(dsl::per_share_ratios)
+            .values(data)
+            .get_result::<PerShareRatios>(conn);
+
+        match insert_result {
+            Ok(_) => println!("Income Statement ratios created successfully"),
+            Err(err) => println!("Error in creating Income Statement ratios : {:?}", err),
+        }
+    }
+
+    pub fn update_income_ratios(pool: web::Data<PgPool>, body: Income, shares: i64) {
+        let conn = &pool.get().unwrap();
+
+        let data = (
+            (stock_id.eq(&body.stock_id)),
+            (year.eq(&body.year)),
+            (gross_profit.eq(&body.gross_profit / shares)),
+            (operating_profit.eq(&body.operating_profit / shares)),
+            (net_profit.eq(&body.net_profit / shares)),
+            (cashflow.eq(&body.total_cashflow / shares)),
+        );
+
+        let update_result = diesel::update(dsl::per_share_ratios)
+        .filter(stock_id.eq(&body.stock_id).and(year.eq(&body.year)))
+        .set(data)
+        .get_result::<PerShareRatios>(conn);
+
+
+        match update_result {
+            Ok(_) => println!("Income Statement ratios created successfully"),
+            Err(err) => println!("Error in creating Income Statement ratios : {:?}", err),
         }
     }
 }

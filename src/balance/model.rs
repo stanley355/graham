@@ -88,7 +88,8 @@ impl Balance {
 
         match insert_result {
             Ok(balance) => {
-                let balance_ratios_exist = PerShareRatios::check_existence(pool.clone(), balance.clone());
+                let balance_ratios_exist =
+                    PerShareRatios::check_existence(pool.clone(), balance.clone());
                 match balance_ratios_exist.unwrap() {
                     true => PerShareRatios::update_balance_ratios(pool, balance),
                     false => PerShareRatios::add_balance_ratios(pool, balance),
@@ -98,5 +99,21 @@ impl Balance {
             }
             Err(err) => format!("Error in inserting balance sheet: {:?}", err),
         }
+    }
+
+    pub fn get_outstanding_shares(
+        pool: web::Data<PgPool>,
+        identifier: BalanceIdentifier,
+    ) -> QueryResult<i64> {
+        let conn = &pool.get().unwrap();
+
+        dsl::balance
+            .select(share_outstanding)
+            .filter(
+                stock_id
+                    .eq(&identifier.stock_id)
+                    .and(year.eq(&identifier.year)),
+            )
+            .get_result::<i64>(conn)
     }
 }
