@@ -1,6 +1,7 @@
 use crate::balance::model::Balance;
-use crate::income::model::Income;
 use crate::db::PgPool;
+use crate::stock::model::ReportIdentifier;
+use crate::income::model::Income;
 use crate::schema::per_share_ratios::*;
 
 use actix_web::web;
@@ -26,7 +27,7 @@ pub struct PerShareRatios {
 }
 
 impl PerShareRatios {
-    pub fn check_existence(pool: web::Data<PgPool>, payload: Balance) -> QueryResult<bool> {
+    pub fn check_existence(pool: web::Data<PgPool>, payload: ReportIdentifier) -> QueryResult<bool> {
         let conn = &pool.get().unwrap();
 
         select(exists(dsl::per_share_ratios.filter(
@@ -57,10 +58,7 @@ impl PerShareRatios {
         }
     }
 
-    pub fn update_balance_ratios(
-        pool: web::Data<PgPool>,
-        body: Balance,
-    ) {
+    pub fn update_balance_ratios(pool: web::Data<PgPool>, body: Balance) {
         let conn = &pool.get().unwrap();
 
         let data = (
@@ -118,10 +116,9 @@ impl PerShareRatios {
         );
 
         let update_result = diesel::update(dsl::per_share_ratios)
-        .filter(stock_id.eq(&body.stock_id).and(year.eq(&body.year)))
-        .set(data)
-        .get_result::<PerShareRatios>(conn);
-
+            .filter(stock_id.eq(&body.stock_id).and(year.eq(&body.year)))
+            .set(data)
+            .get_result::<PerShareRatios>(conn);
 
         match update_result {
             Ok(_) => println!("Income Statement ratios created successfully"),

@@ -1,5 +1,6 @@
 use crate::db::PgPool;
 use crate::income::req;
+use crate::stock::model::ReportIdentifier;
 use crate::schema::income::*;
 
 use actix_web::web;
@@ -8,11 +9,6 @@ use diesel::{
     RunQueryDsl,
 };
 use serde::{Deserialize, Serialize};
-
-pub struct IncomeIdentifier {
-    pub stock_id: i32,
-    pub year: i32,
-}
 
 #[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
 pub struct Income {
@@ -33,7 +29,7 @@ pub struct Income {
 impl Income {
     pub fn check_existence(
         pool: web::Data<PgPool>,
-        payload: IncomeIdentifier,
+        payload: ReportIdentifier,
     ) -> QueryResult<bool> {
         let conn = &pool.get().unwrap();
 

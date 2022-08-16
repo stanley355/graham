@@ -1,6 +1,6 @@
 use crate::balance::{model, req};
 use crate::db::PgPool;
-use crate::stock::model::Stock;
+use crate::stock::model::{Stock, ReportIdentifier};
 use actix_web::{post, web, HttpResponse};
 
 #[post("/")]
@@ -9,11 +9,11 @@ async fn add_balance(pool: web::Data<PgPool>, body: web::Json<req::AddBalanceReq
 
     match stock_id {
         Ok(id) => {
-            let balance_identifier = model::BalanceIdentifier {
+            let identifier = ReportIdentifier {
                 stock_id: id,
                 year: body.year.clone(),
             };
-            let balance_exist = model::Balance::check_existence(pool.clone(), balance_identifier);
+            let balance_exist = model::Balance::check_existence(pool.clone(), identifier);
 
             match balance_exist.unwrap() {
                 true => HttpResponse::BadRequest().body(format!("Error : Balance Sheet exists!")),

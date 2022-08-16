@@ -1,5 +1,6 @@
 use crate::balance::req;
 use crate::db::PgPool;
+use crate::stock::model::ReportIdentifier;
 use crate::ratios::per_share_ratios::PerShareRatios;
 use crate::schema::balance::*;
 
@@ -9,11 +10,6 @@ use diesel::{
     RunQueryDsl,
 };
 use serde::{Deserialize, Serialize};
-
-pub struct BalanceIdentifier {
-    pub stock_id: i32,
-    pub year: i32,
-}
 
 #[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
 pub struct Balance {
@@ -40,7 +36,7 @@ pub struct Balance {
 impl Balance {
     pub fn check_existence(
         pool: web::Data<PgPool>,
-        payload: BalanceIdentifier,
+        payload: ReportIdentifier,
     ) -> QueryResult<bool> {
         let conn = &pool.get().unwrap();
 
@@ -88,8 +84,12 @@ impl Balance {
 
         match insert_result {
             Ok(balance) => {
+                let identifier = ReportIdentifier {
+                    stock_id: balance.stock_id,
+                    year: balance.year
+                };
                 let balance_ratios_exist =
-                    PerShareRatios::check_existence(pool.clone(), balance.clone());
+                    PerShareRatios::check_existence(pool.clone(), identifier);
                 match balance_ratios_exist.unwrap() {
                     true => PerShareRatios::update_balance_ratios(pool, balance),
                     false => PerShareRatios::add_balance_ratios(pool, balance),
@@ -103,7 +103,7 @@ impl Balance {
 
     pub fn get_outstanding_shares(
         pool: web::Data<PgPool>,
-        identifier: BalanceIdentifier,
+        identifier: ReportIdentifier,
     ) -> QueryResult<i64> {
         let conn = &pool.get().unwrap();
 

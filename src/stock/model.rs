@@ -6,6 +6,11 @@ use actix_web::web;
 use diesel::{dsl::exists, select, ExpressionMethods, QueryDsl, QueryResult, RunQueryDsl};
 use serde::{Deserialize, Serialize};
 
+pub struct ReportIdentifier {
+    pub stock_id: i32,
+    pub year: i32,
+}
+
 #[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
 pub struct Stock {
     pub id: i32,
