@@ -1,7 +1,9 @@
+use crate::balance::model::Balance;
 use crate::db::PgPool;
 use crate::income::req;
-use crate::stock::model::ReportIdentifier;
+use crate::ratios::per_share_ratios::PerShareRatios;
 use crate::schema::income::*;
+use crate::stock::model::ReportIdentifier;
 
 use actix_web::web;
 use diesel::{
@@ -43,7 +45,7 @@ impl Income {
         pool: web::Data<PgPool>,
         body: web::Json<req::AddIncomeReq>,
         stck_id: i32,
-    ) -> QueryResult<Income> {
+    ) -> String {
         let conn = &pool.get().unwrap();
 
         let data = (
@@ -62,8 +64,35 @@ impl Income {
                 + &body.financing_cashflow)),
         );
 
-        diesel::insert_into(dsl::income)
+        let insert_result = diesel::insert_into(dsl::income)
             .values(data)
-            .get_result(conn)
+            .get_result::<Income>(conn);
+
+        match insert_result {
+            Ok(income) => {
+                let identifier = ReportIdentifier {
+                    stock_id: income.stock_id,
+                    year: income.year,
+                };
+                let outstanding_shares = Balance::get_outstanding_shares(pool.clone(), identifier);
+
+                Income::create_ps_ratios(pool.clone(), income, outstanding_shares.unwrap());
+
+                format!("Balance Sheet created successfully")
+            }
+            Err(err) => format!("Error in inserting balance sheet: {:?}", err),
+        }
+    }
+
+    pub fn create_ps_ratios(pool: web::Data<PgPool>, income_statement: Income, shares: i64) {
+        let identifier = ReportIdentifier {
+            stock_id: income_statement.stock_id,
+            year: income_statement.year,
+        };
+        let balance_ratios_exist = PerShareRatios::check_existence(pool.clone(), identifier);
+        match balance_ratios_exist.unwrap() {
+            true => PerShareRatios::update_income_ratios(pool, income_statement, shares),
+            false => PerShareRatios::add_income_ratios(pool, income_statement, shares),
+        };
     }
 }
