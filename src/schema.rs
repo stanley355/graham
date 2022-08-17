@@ -22,6 +22,24 @@ table! {
 }
 
 table! {
+    comparative_ratios (id) {
+        id -> Int4,
+        stock_id -> Int4,
+        year -> Int4,
+        gross_profit_margin -> Nullable<Int4>,
+        operating_profit_margin -> Nullable<Int4>,
+        net_profit_margin -> Nullable<Int4>,
+        current_asset_return -> Nullable<Int4>,
+        tangible_asset_return -> Nullable<Int4>,
+        total_liability_return -> Nullable<Int4>,
+        revenue_receivable_return -> Nullable<Int4>,
+        inventory_receivable_return -> Nullable<Int4>,
+        current_asset_liabilities_return -> Nullable<Int4>,
+        tangible_asset_total_liabilities_return -> Nullable<Int4>,
+    }
+}
+
+table! {
     income (id) {
         id -> Int4,
         stock_id -> Int4,
@@ -63,11 +81,13 @@ table! {
 }
 
 joinable!(balance -> stocks (stock_id));
+joinable!(comparative_ratios -> stocks (stock_id));
 joinable!(income -> stocks (stock_id));
 joinable!(per_share_ratios -> stocks (stock_id));
 
 allow_tables_to_appear_in_same_query!(
     balance,
+    comparative_ratios,
     income,
     per_share_ratios,
     stocks,
