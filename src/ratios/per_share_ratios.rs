@@ -7,7 +7,7 @@ use crate::schema::per_share_ratios::*;
 use actix_web::web;
 use diesel::{
     dsl::exists, select, BoolExpressionMethods, ExpressionMethods, QueryDsl, QueryResult,
-    RunQueryDsl,
+    RunQueryDsl, expression::array_comparison::In,
 };
 use serde::{Deserialize, Serialize};
 
@@ -36,16 +36,20 @@ impl PerShareRatios {
         .get_result(conn)
     }
 
-    pub fn add_balance_ratios(pool: web::Data<PgPool>, body: Balance) {
+    pub fn add(pool: web::Data<PgPool>, balance: Balance, income: Income) {
         let conn = &pool.get().unwrap();
 
         let data = (
-            (stock_id.eq(&body.stock_id)),
-            (year.eq(&body.year)),
-            (cash_equity.eq(&body.net_cash_asset / &body.share_outstanding)),
-            (quick_equity.eq(&body.net_quick_asset / &body.share_outstanding)),
-            (current_equity.eq(&body.net_current_asset / &body.share_outstanding)),
-            (tangible_equity.eq(&body.net_tangible_asset / &body.share_outstanding)),
+            (stock_id.eq(&balance.stock_id)),
+            (year.eq(&balance.year)),
+            (cash_equity.eq(&balance.net_cash_asset / &balance.share_outstanding)),
+            (quick_equity.eq(&balance.net_quick_asset / &balance.share_outstanding)),
+            (current_equity.eq(&balance.net_current_asset / &balance.share_outstanding)),
+            (tangible_equity.eq(&balance.net_tangible_asset / &balance.share_outstanding)),
+            (gross_profit.eq(&income.gross_profit / &balance.share_outstanding)),
+            (operating_profit.eq(&income.operating_profit / &balance.share_outstanding)),
+            (net_profit.eq(&income.net_profit / &balance.share_outstanding)),
+            (cashflow.eq(&income.total_cashflow / &balance.share_outstanding)),
         );
 
         let insert_result = diesel::insert_into(dsl::per_share_ratios)
@@ -53,76 +57,8 @@ impl PerShareRatios {
             .get_result::<PerShareRatios>(conn);
 
         match insert_result {
-            Ok(_) => println!("Balance Sheet ratios created successfully"),
-            Err(err) => println!("Error in creating Balance Sheet ratios : {:?}", err),
-        }
-    }
-
-    pub fn update_balance_ratios(pool: web::Data<PgPool>, body: Balance) {
-        let conn = &pool.get().unwrap();
-
-        let data = (
-            (stock_id.eq(&body.stock_id)),
-            (year.eq(&body.year)),
-            (cash_equity.eq(&body.net_cash_asset / &body.share_outstanding)),
-            (quick_equity.eq(&body.net_quick_asset / &body.share_outstanding)),
-            (current_equity.eq(&body.net_current_asset / &body.share_outstanding)),
-            (tangible_equity.eq(&body.net_tangible_asset / &body.share_outstanding)),
-        );
-
-        let update_result = diesel::update(dsl::per_share_ratios)
-            .filter(stock_id.eq(&body.stock_id).and(year.eq(&body.year)))
-            .set(data)
-            .get_result::<PerShareRatios>(conn);
-
-        match update_result {
-            Ok(_) => println!("Balance Sheet ratios updated successfully"),
-            Err(err) => println!("Error in updating Balance Sheet ratios : {:?}", err),
-        }
-    }
-
-    pub fn add_income_ratios(pool: web::Data<PgPool>, body: Income, shares: i64) {
-        let conn = &pool.get().unwrap();
-
-        let data = (
-            (stock_id.eq(&body.stock_id)),
-            (year.eq(&body.year)),
-            (gross_profit.eq(&body.gross_profit / shares)),
-            (operating_profit.eq(&body.operating_profit / shares)),
-            (net_profit.eq(&body.net_profit / shares)),
-            (cashflow.eq(&body.total_cashflow / shares)),
-        );
-
-        let insert_result = diesel::insert_into(dsl::per_share_ratios)
-            .values(data)
-            .get_result::<PerShareRatios>(conn);
-
-        match insert_result {
-            Ok(_) => println!("Income Statement ratios created successfully"),
-            Err(err) => println!("Error in creating Income Statement ratios : {:?}", err),
-        }
-    }
-
-    pub fn update_income_ratios(pool: web::Data<PgPool>, body: Income, shares: i64) {
-        let conn = &pool.get().unwrap();
-
-        let data = (
-            (stock_id.eq(&body.stock_id)),
-            (year.eq(&body.year)),
-            (gross_profit.eq(&body.gross_profit / shares)),
-            (operating_profit.eq(&body.operating_profit / shares)),
-            (net_profit.eq(&body.net_profit / shares)),
-            (cashflow.eq(&body.total_cashflow / shares)),
-        );
-
-        let update_result = diesel::update(dsl::per_share_ratios)
-            .filter(stock_id.eq(&body.stock_id).and(year.eq(&body.year)))
-            .set(data)
-            .get_result::<PerShareRatios>(conn);
-
-        match update_result {
-            Ok(_) => println!("Income Statement ratios created successfully"),
-            Err(err) => println!("Error in creating Income Statement ratios : {:?}", err),
+            Ok(_) => println!("Per Share ratios created successfully"),
+            Err(err) => println!("Error in creating Per Share ratios : {:?}", err),
         }
     }
 }

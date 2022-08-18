@@ -31,13 +31,17 @@ pub struct Income {
 impl Income {
     pub fn check_existence(
         pool: web::Data<PgPool>,
-        payload: ReportIdentifier,
+        identifier: ReportIdentifier,
     ) -> QueryResult<bool> {
         let conn = &pool.get().unwrap();
 
-        select(exists(dsl::income.filter(
-            stock_id.eq(&payload.stock_id).and(year.eq(&payload.year)),
-        )))
+        select(exists(
+            dsl::income.filter(
+                stock_id
+                    .eq(&identifier.stock_id)
+                    .and(year.eq(&identifier.year)),
+            ),
+        ))
         .get_result(conn)
     }
 
@@ -86,6 +90,7 @@ impl Income {
                     stock_id: income.stock_id,
                     year: income.year,
                 };
+                // TODO: Check if balance already exist before creating ps ratios
                 let outstanding_shares = Balance::get_outstanding_shares(pool.clone(), identifier);
 
                 Income::create_ps_ratios(pool.clone(), income, outstanding_shares.unwrap());
@@ -101,10 +106,19 @@ impl Income {
             stock_id: income_statement.stock_id,
             year: income_statement.year,
         };
-        let balance_ratios_exist = PerShareRatios::check_existence(pool.clone(), identifier);
-        match balance_ratios_exist.unwrap() {
-            true => PerShareRatios::update_income_ratios(pool, income_statement, shares),
-            false => PerShareRatios::add_income_ratios(pool, income_statement, shares),
-        };
+        let balance_sheet_exist =
+            Balance::check_existence(pool.clone(), identifier.clone()).unwrap();
+
+        match balance_sheet_exist {
+            true => {
+                let balance_sheet = Balance::get(pool.clone(), identifier);
+
+                match balance_sheet {
+                    Ok(balance) => PerShareRatios::add(pool.clone(), balance, income_statement),
+                    Err(err) => println!("Failed creating Per Share Ratios error: {:?}", err),
+                }
+            }
+            false => println!("Skipped creating Per Share Ratios of {:?}", identifier),
+        }
     }
 }

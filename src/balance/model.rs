@@ -37,14 +37,30 @@ pub struct Balance {
 impl Balance {
     pub fn check_existence(
         pool: web::Data<PgPool>,
-        payload: ReportIdentifier,
+        identifier: ReportIdentifier,
     ) -> QueryResult<bool> {
         let conn = &pool.get().unwrap();
 
-        select(exists(dsl::balance.filter(
-            stock_id.eq(&payload.stock_id).and(year.eq(&payload.year)),
-        )))
+        select(exists(
+            dsl::balance.filter(
+                stock_id
+                    .eq(&identifier.stock_id)
+                    .and(year.eq(&identifier.year)),
+            ),
+        ))
         .get_result(conn)
+    }
+
+    pub fn get(pool: web::Data<PgPool>, identifier: ReportIdentifier) -> QueryResult<Balance> {
+        let conn = &pool.get().unwrap();
+
+        table
+            .filter(
+                stock_id
+                    .eq(identifier.stock_id)
+                    .and(year.eq(identifier.year)),
+            )
+            .get_result::<Balance>(conn)
     }
 
     pub fn add(
@@ -98,11 +114,19 @@ impl Balance {
             stock_id: balance_sheet.stock_id,
             year: balance_sheet.year,
         };
-        let balance_ratios_exist = PerShareRatios::check_existence(pool.clone(), identifier);
-        match balance_ratios_exist.unwrap() {
-            true => PerShareRatios::update_balance_ratios(pool, balance_sheet),
-            false => PerShareRatios::add_balance_ratios(pool, balance_sheet),
-        };
+        let income_sheet_exist = Income::check_existence(pool.clone(), identifier.clone()).unwrap();
+
+        match income_sheet_exist {
+            true => {
+                let income_sheet = Income::get(pool.clone(), identifier);
+
+                match income_sheet {
+                    Ok(income) => PerShareRatios::add(pool.clone(), balance_sheet, income),
+                    Err(err) => println!("Failed creating Per Share Ratios error: {:?}", err),
+                }
+            }
+            false => println!("Skipped creating Per Share Ratios of {:?}", identifier),
+        }
     }
 
     pub fn create_comparative_ratios(pool: web::Data<PgPool>, balance_sheet: Balance) {
