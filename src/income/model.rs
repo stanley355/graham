@@ -1,4 +1,3 @@
-use crate::balance::model::Balance;
 use crate::db::PgPool;
 use crate::income::req;
 use crate::ratios::per_share_ratios::PerShareRatios;
@@ -86,32 +85,15 @@ impl Income {
 
         match insert_result {
             Ok(income) => {
-                Income::create_ps_ratios(pool.clone(), income);
+                let identifier = ReportIdentifier {
+                    stock_id: income.stock_id,
+                    year: income.year,
+                };
+                PerShareRatios::add(pool.clone(), identifier);
 
                 format!("Income Statement created successfully")
             }
             Err(err) => format!("Error in creating Income Statement: {:?}", err),
-        }
-    }
-
-    pub fn create_ps_ratios(pool: web::Data<PgPool>, income_statement: Income) {
-        let identifier = ReportIdentifier {
-            stock_id: income_statement.stock_id,
-            year: income_statement.year,
-        };
-        let balance_sheet_exist =
-            Balance::check_existence(pool.clone(), identifier.clone()).unwrap();
-
-        match balance_sheet_exist {
-            true => {
-                let balance_sheet = Balance::get(pool.clone(), identifier);
-
-                match balance_sheet {
-                    Ok(balance) => PerShareRatios::add(pool.clone(), balance, income_statement),
-                    Err(err) => println!("Failed creating Per Share Ratios error: {:?}", err),
-                }
-            }
-            false => println!("Skipped creating Per Share Ratios of {:?}", identifier),
         }
     }
 }
