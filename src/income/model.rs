@@ -89,7 +89,7 @@ impl Income {
                     stock_id: income.stock_id,
                     year: income.year,
                 };
-                PerShareRatios::add(pool.clone(), identifier);
+                PerShareRatios::create(pool.clone(), identifier);
 
                 format!("Income Statement created successfully")
             }

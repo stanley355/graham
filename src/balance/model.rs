@@ -105,7 +105,7 @@ impl Balance {
                     stock_id: balance.stock_id,
                     year: balance.year,
                 };
-                PerShareRatios::add(pool.clone(), identifier);
+                PerShareRatios::create(pool.clone(), identifier);
                 // Balance::create_comparative_ratios(pool.clone(), balance);
                 format!("Balance Sheet created successfully")
             }

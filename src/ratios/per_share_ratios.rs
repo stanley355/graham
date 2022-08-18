@@ -24,7 +24,7 @@ pub struct PerShareRatios {
 }
 
 impl PerShareRatios {
-    pub fn add(pool: web::Data<PgPool>, identifier: ReportIdentifier) {
+    pub fn create(pool: web::Data<PgPool>, identifier: ReportIdentifier) {
         let balance_data = Balance::get(pool.clone(), identifier.clone());
         let income_data = Income::get(pool.clone(), identifier.clone());
 
