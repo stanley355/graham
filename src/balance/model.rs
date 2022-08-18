@@ -149,20 +149,4 @@ impl Balance {
             false => println!("Skipped creating Comparative Ratios of {:?}", identifier),
         }
     }
-
-    pub fn get_outstanding_shares(
-        pool: web::Data<PgPool>,
-        identifier: ReportIdentifier,
-    ) -> QueryResult<i64> {
-        let conn = &pool.get().unwrap();
-
-        dsl::balance
-            .select(share_outstanding)
-            .filter(
-                stock_id
-                    .eq(&identifier.stock_id)
-                    .and(year.eq(&identifier.year)),
-            )
-            .get_result::<i64>(conn)
-    }
 }

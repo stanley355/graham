@@ -86,14 +86,7 @@ impl Income {
 
         match insert_result {
             Ok(income) => {
-                let identifier = ReportIdentifier {
-                    stock_id: income.stock_id,
-                    year: income.year,
-                };
-                // TODO: Check if balance already exist before creating ps ratios
-                let outstanding_shares = Balance::get_outstanding_shares(pool.clone(), identifier);
-
-                Income::create_ps_ratios(pool.clone(), income, outstanding_shares.unwrap());
+                Income::create_ps_ratios(pool.clone(), income);
 
                 format!("Income Statement created successfully")
             }
@@ -101,7 +94,7 @@ impl Income {
         }
     }
 
-    pub fn create_ps_ratios(pool: web::Data<PgPool>, income_statement: Income, shares: i64) {
+    pub fn create_ps_ratios(pool: web::Data<PgPool>, income_statement: Income) {
         let identifier = ReportIdentifier {
             stock_id: income_statement.stock_id,
             year: income_statement.year,

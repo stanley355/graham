@@ -1,14 +1,10 @@
 use crate::balance::model::Balance;
 use crate::db::PgPool;
-use crate::stock::model::ReportIdentifier;
 use crate::income::model::Income;
 use crate::schema::per_share_ratios::*;
 
 use actix_web::web;
-use diesel::{
-    dsl::exists, select, BoolExpressionMethods, ExpressionMethods, QueryDsl, QueryResult,
-    RunQueryDsl, expression::array_comparison::In,
-};
+use diesel::{ExpressionMethods, RunQueryDsl};
 use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
@@ -27,15 +23,6 @@ pub struct PerShareRatios {
 }
 
 impl PerShareRatios {
-    pub fn check_existence(pool: web::Data<PgPool>, payload: ReportIdentifier) -> QueryResult<bool> {
-        let conn = &pool.get().unwrap();
-
-        select(exists(dsl::per_share_ratios.filter(
-            stock_id.eq(&payload.stock_id).and(year.eq(&payload.year)),
-        )))
-        .get_result(conn)
-    }
-
     pub fn add(pool: web::Data<PgPool>, balance: Balance, income: Income) {
         let conn = &pool.get().unwrap();
 
