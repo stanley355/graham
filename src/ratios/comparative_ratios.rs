@@ -2,13 +2,9 @@ use crate::balance::model::Balance;
 use crate::db::PgPool;
 use crate::income::model::Income;
 use crate::schema::comparative_ratios::*;
-use crate::stock::model::ReportIdentifier;
 
 use actix_web::web;
-use diesel::{
-    dsl::exists, select, BoolExpressionMethods, ExpressionMethods, QueryDsl, QueryResult,
-    RunQueryDsl,
-};
+use diesel::{ExpressionMethods, RunQueryDsl};
 use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
@@ -29,18 +25,6 @@ pub struct ComparativeRatios {
 }
 
 impl ComparativeRatios {
-    pub fn check_existence(
-        pool: web::Data<PgPool>,
-        payload: ReportIdentifier,
-    ) -> QueryResult<bool> {
-        let conn = &pool.get().unwrap();
-
-        select(exists(dsl::comparative_ratios.filter(
-            stock_id.eq(&payload.stock_id).and(year.eq(&payload.year)),
-        )))
-        .get_result(conn)
-    }
-
     pub fn add(pool: web::Data<PgPool>, balance: Balance, income: Income) {
         let conn = &pool.get().unwrap();
 
@@ -52,8 +36,10 @@ impl ComparativeRatios {
         let total_liabil_return = (&income.net_profit / &balance.total_liabilities) * 100;
         let reven_receivable_return = (&income.revenue / &balance.receivables) * 100;
         let reven_inventory_return = (&income.revenue / &balance.inventories) * 100;
-        let current_asset_to_liabilitiy_return = (&balance.current_asset / &balance.st_liabilities) * 100;
-        let tang_asset_to_total_liability_return = (&balance.tangible_asset / &balance.total_liabilities) * 100;
+        let current_asset_to_liabilitiy_return =
+            (&balance.current_asset / &balance.st_liabilities) * 100;
+        let tang_asset_to_total_liability_return =
+            (&balance.tangible_asset / &balance.total_liabilities) * 100;
 
         let data = (
             (stock_id.eq(&balance.stock_id)),
@@ -67,7 +53,8 @@ impl ComparativeRatios {
             (revenue_receivable_return.eq(reven_receivable_return as i32)),
             (revenue_inventory_return.eq(reven_inventory_return as i32)),
             (current_asset_liabilities_return.eq(current_asset_to_liabilitiy_return as i32)),
-            (tangible_asset_total_liabilities_return.eq(tang_asset_to_total_liability_return as i32))
+            (tangible_asset_total_liabilities_return
+                .eq(tang_asset_to_total_liability_return as i32)),
         );
 
         let insert_result = diesel::insert_into(dsl::comparative_ratios)
