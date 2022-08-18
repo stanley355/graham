@@ -75,8 +75,8 @@ impl ComparativeRatios {
             .get_result::<ComparativeRatios>(conn);
 
         match insert_result {
-            Ok(_) => println!("Balance Sheet ratios created successfully"),
-            Err(err) => println!("Error in creating Balance Sheet ratios : {:?}", err),
+            Ok(_) => println!("Comparative ratios created successfully"),
+            Err(err) => println!("Error in creating Comparative ratios : {:?}", err),
         }
     }
 }
