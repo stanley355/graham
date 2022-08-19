@@ -64,7 +64,7 @@ impl ComparativeRatios {
             .get_result::<ComparativeRatios>(conn);
 
         match insert_result {
-            Ok(_) => println!("Comparative ratios created successfully"),
+            Ok(_) => println!("Comparative ratios created successfully!"),
             Err(err) => println!("Error in creating Comparative ratios : {:?}", err),
         }
     }
