@@ -30,18 +30,21 @@ impl ComparativeRatios {
         let income = payload.1;
         let conn = &pool.get().unwrap();
 
-        let gross_prof_margin = (&income.gross_profit / &income.revenue) * 100;
-        let op_prof_margin = (&income.operating_profit / &income.revenue) * 100;
-        let net_prof_margin = (&income.net_profit / &income.revenue) * 100;
-        let cur_asset_return = (&income.net_profit / &balance.net_current_asset) * 100;
-        let tang_asset_return = (&income.net_profit / &balance.net_tangible_asset) * 100;
-        let total_liabil_return = (&income.net_profit / &balance.total_liabilities) * 100;
-        let reven_receivable_return = (&income.revenue / &balance.receivables) * 100;
-        let reven_inventory_return = (&income.revenue / &balance.inventories) * 100;
+        let gross_prof_margin = (income.gross_profit as f64 / income.revenue as f64) * 100.0;
+        let op_prof_margin = (income.operating_profit as f64 / income.revenue as f64) * 100.0;
+        let net_prof_margin = (income.net_profit as f64 / income.revenue as f64) * 100.0;
+        let cur_asset_return =
+            (income.net_profit as f64 / balance.net_current_asset as f64) * 100.0;
+        let tang_asset_return =
+            (income.net_profit as f64 / balance.net_tangible_asset as f64) * 100.0;
+        let total_liabil_return =
+            (income.net_profit as f64 / balance.total_liabilities as f64) * 100.0;
+        let reven_receivable_return = (income.revenue as f64 / balance.receivables as f64) * 100.0;
+        let reven_inventory_return = (income.revenue as f64 / balance.inventories as f64) * 100.0;
         let current_asset_to_liabilitiy_return =
-            (&balance.current_asset / &balance.st_liabilities) * 100;
+            (balance.current_asset as f64 / balance.st_liabilities as f64) * 100.0;
         let tang_asset_to_total_liability_return =
-            (&balance.tangible_asset / &balance.total_liabilities) * 100;
+            (balance.tangible_asset as f64 / balance.total_liabilities as f64) * 100.0;
 
         let data = (
             (stock_id.eq(&balance.stock_id)),
