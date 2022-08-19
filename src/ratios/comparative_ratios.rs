@@ -25,7 +25,9 @@ pub struct ComparativeRatios {
 }
 
 impl ComparativeRatios {
-    pub fn add(pool: web::Data<PgPool>, balance: Balance, income: Income) {
+    pub fn create(pool: web::Data<PgPool>, payload: (Balance, Income)) {
+        let balance = payload.0;
+        let income = payload.1;
         let conn = &pool.get().unwrap();
 
         let gross_prof_margin = (&income.gross_profit / &income.revenue) * 100;

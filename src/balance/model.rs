@@ -1,9 +1,7 @@
 use crate::balance::req;
 use crate::db::PgPool;
-use crate::income::model::Income;
-use crate::ratios::{comparative_ratios::ComparativeRatios, per_share_ratios::PerShareRatios};
 use crate::schema::balance::*;
-use crate::stock::model::ReportIdentifier;
+use crate::stock::model::{ReportIdentifier, Stock};
 
 use actix_web::web;
 use diesel::{
@@ -105,33 +103,10 @@ impl Balance {
                     stock_id: balance.stock_id,
                     year: balance.year,
                 };
-                PerShareRatios::create(pool.clone(), identifier);
-                // Balance::create_comparative_ratios(pool.clone(), balance);
+                Stock::create_ratios(pool, identifier);
                 format!("Balance Sheet created successfully")
             }
             Err(err) => format!("Error in inserting balance sheet: {:?}", err),
-        }
-    }
-
-
-    pub fn create_comparative_ratios(pool: web::Data<PgPool>, balance_sheet: Balance) {
-        let identifier = ReportIdentifier {
-            stock_id: balance_sheet.stock_id,
-            year: balance_sheet.year,
-        };
-
-        let income_sheet_exist = Income::check_existence(pool.clone(), identifier.clone()).unwrap();
-
-        match income_sheet_exist {
-            true => {
-                let income_sheet = Income::get(pool.clone(), identifier);
-
-                match income_sheet {
-                    Ok(income) => ComparativeRatios::add(pool.clone(), balance_sheet, income),
-                    Err(err) => println!("Failed creating Comparative Ratios error: {:?}", err),
-                }
-            }
-            false => println!("Skipped creating Comparative Ratios of {:?}", identifier),
         }
     }
 }

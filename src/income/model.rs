@@ -1,8 +1,7 @@
 use crate::db::PgPool;
 use crate::income::req;
-use crate::ratios::per_share_ratios::PerShareRatios;
 use crate::schema::income::*;
-use crate::stock::model::ReportIdentifier;
+use crate::stock::model::{ReportIdentifier, Stock};
 
 use actix_web::web;
 use diesel::{
@@ -89,7 +88,7 @@ impl Income {
                     stock_id: income.stock_id,
                     year: income.year,
                 };
-                PerShareRatios::create(pool.clone(), identifier);
+                Stock::create_ratios(pool, identifier);
 
                 format!("Income Statement created successfully")
             }
