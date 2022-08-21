@@ -1,6 +1,7 @@
 use crate::db::PgPool;
 use crate::income::{model, req};
-use crate::stock::model::{ReportIdentifier, Stock};
+use crate::stock::model::Stock;
+use crate::report::model::ReportIdentifier;
 use actix_web::{post, web, HttpResponse};
 
 #[post("/")]
