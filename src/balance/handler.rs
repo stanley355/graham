@@ -1,6 +1,7 @@
 use crate::balance::{model, req};
 use crate::db::PgPool;
-use crate::stock::model::{Stock, ReportIdentifier};
+use crate::report::model::ReportIdentifier;
+use crate::stock::model::Stock;
 use actix_web::{post, web, HttpResponse};
 
 #[post("/")]
@@ -18,7 +19,7 @@ async fn add_balance(pool: web::Data<PgPool>, body: web::Json<req::AddBalanceReq
             match balance_exist.unwrap() {
                 true => HttpResponse::BadRequest().body(format!("Error : Balance Sheet exists!")),
                 false => {
-                    let insert_result = model::Balance::add(pool, body,id);
+                    let insert_result = model::Balance::add(pool, body, id);
                     HttpResponse::Ok().body(insert_result)
                 }
             }
@@ -28,7 +29,6 @@ async fn add_balance(pool: web::Data<PgPool>, body: web::Json<req::AddBalanceReq
     }
 }
 
-// Routing for hosts
 pub fn route(config: &mut web::ServiceConfig) {
     config.service(add_balance);
 }

@@ -1,6 +1,7 @@
 use crate::db::PgPool;
 use crate::income::{model, req};
-use crate::stock::model::{ReportIdentifier, Stock};
+use crate::stock::model::Stock;
+use crate::report::model::ReportIdentifier;
 use actix_web::{post, web, HttpResponse};
 
 #[post("/")]
@@ -29,7 +30,6 @@ async fn add_income(pool: web::Data<PgPool>, body: web::Json<req::AddIncomeReq>)
     }
 }
 
-// Routing for hosts
 pub fn route(config: &mut web::ServiceConfig) {
     config.service(add_income);
 }

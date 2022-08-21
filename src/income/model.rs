@@ -1,7 +1,8 @@
 use crate::db::PgPool;
 use crate::income::req;
 use crate::schema::income::*;
-use crate::stock::model::{ReportIdentifier, Stock};
+use crate::stock::model::Stock;
+use crate::report::model::ReportIdentifier;
 
 use actix_web::web;
 use diesel::{
