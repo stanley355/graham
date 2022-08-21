@@ -24,7 +24,7 @@ async fn view_stocks(pool: web::Data<PgPool>) -> HttpResponse {
     }
 }
 
-// Routing for hosts
+// Routing for stocks
 pub fn route(config: &mut web::ServiceConfig) {
     config.service(add_stock).service(view_stocks);
 }
