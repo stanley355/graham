@@ -29,7 +29,6 @@ async fn add_balance(pool: web::Data<PgPool>, body: web::Json<req::AddBalanceReq
     }
 }
 
-// Routing for income
 pub fn route(config: &mut web::ServiceConfig) {
     config.service(add_balance);
 }

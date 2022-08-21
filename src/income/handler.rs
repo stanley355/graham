@@ -30,7 +30,6 @@ async fn add_income(pool: web::Data<PgPool>, body: web::Json<req::AddIncomeReq>)
     }
 }
 
-// Routing for income
 pub fn route(config: &mut web::ServiceConfig) {
     config.service(add_income);
 }
