@@ -1,8 +1,6 @@
 use crate::balance::model::Balance;
-use crate::db::PgPool;
 use crate::income::model::Income;
 
-use actix_web::web;
 use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
