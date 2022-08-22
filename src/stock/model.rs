@@ -1,8 +1,4 @@
-use crate::balance::model::Balance;
 use crate::db::PgPool;
-use crate::income::model::Income;
-use crate::ratios::{comparative_ratios::ComparativeRatios, per_share_ratios::PerShareRatios};
-use crate::report::model::ReportIdentifier;
 use crate::schema::stocks::*;
 use crate::stock::req;
 
@@ -44,15 +40,5 @@ impl Stock {
             .filter(&code.eq(stock_code))
             .select(id)
             .get_result::<i32>(conn)
-    }
-
-    pub fn get_balance_and_income(
-        pool: web::Data<PgPool>,
-        identifier: ReportIdentifier,
-    ) -> (QueryResult<Balance>, QueryResult<Income>) {
-        let balance_data = Balance::get(pool.clone(), identifier.clone());
-        let income_data = Income::get(pool.clone(), identifier.clone());
-
-        (balance_data, income_data)
     }
 }

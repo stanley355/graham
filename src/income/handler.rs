@@ -1,7 +1,7 @@
 use crate::db::PgPool;
 use crate::income::{model, req};
-use crate::stock::model::Stock;
 use crate::report::model::ReportIdentifier;
+use crate::stock::model::Stock;
 use actix_web::{post, web, HttpResponse};
 
 #[post("/")]
@@ -17,16 +17,19 @@ async fn add_income(pool: web::Data<PgPool>, body: web::Json<req::AddIncomeReq>)
             let income_exist = model::Income::check_existence(pool.clone(), identifier);
 
             match income_exist.unwrap() {
-                true => {
-                    HttpResponse::BadRequest().body(format!("Error : Income Statement exists!"))
-                }
+                true => HttpResponse::BadRequest().body(format!("Error : Income exists!")),
                 false => {
-                    let insert_result = model::Income::add(pool, body, id);
-                    HttpResponse::Ok().body(insert_result)
+                    let new_income = model::Income::add(pool, body, id);
+                    match new_income {
+                        Ok(income) => HttpResponse::Ok().json(income),
+                        Err(err) => {
+                            HttpResponse::InternalServerError().body(format!("Error : {:?}", err))
+                        }
+                    }
                 }
             }
         }
-        Err(err) => HttpResponse::BadRequest().body(format!("Error Stock ID {:?}", err)),
+        Err(err) => HttpResponse::BadRequest().body(format!("Error : {:?}", err)),
     }
 }
 

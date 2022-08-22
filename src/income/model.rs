@@ -59,7 +59,7 @@ impl Income {
         pool: web::Data<PgPool>,
         body: web::Json<req::AddIncomeReq>,
         stck_id: i32,
-    ) -> String {
+    ) -> QueryResult<Income> {
         let conn = &pool.get().unwrap();
 
         let data = (
@@ -78,13 +78,8 @@ impl Income {
                 + &body.financing_cashflow)),
         );
 
-        let insert_result = diesel::insert_into(dsl::income)
+        diesel::insert_into(dsl::income)
             .values(data)
-            .get_result::<Income>(conn);
-
-        match insert_result {
-            Ok(income) => format!("Income Statement created successfully"),
-            Err(err) => format!("Error in creating Income Statement: {:?}", err),
-        }
+            .get_result::<Income>(conn)
     }
 }
