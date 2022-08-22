@@ -1,7 +1,4 @@
-use crate::balance::model::Balance;
 use crate::db::PgPool;
-use crate::income::model::Income;
-use crate::ratios::{comparative_ratios::ComparativeRatios, per_share_ratios::PerShareRatios};
 use crate::schema::{balance, income};
 
 use actix_web::web;
@@ -47,7 +44,10 @@ pub struct Report {
 }
 
 impl Report {
-    pub fn get_company_reports(pool: web::Data<PgPool>, stck_id: i32) -> QueryResult<Vec<Report>> {
+    pub fn get_report(
+        pool: web::Data<PgPool>,
+        identifier: ReportIdentifier,
+    ) -> QueryResult<Report> {
         let conn = &pool.get().unwrap();
 
         let selection = (
@@ -79,7 +79,51 @@ impl Report {
             income::total_cashflow,
         );
 
-        let data = balance::table
+        balance::table
+            .filter(balance::year.eq(identifier.year))
+            .inner_join(
+                income::table.on(balance::stock_id
+                    .eq(identifier.stock_id)
+                    .and(balance::stock_id.eq(identifier.stock_id))
+                    .and(balance::year.eq(income::year))),
+            )
+            .select(selection)
+            .get_result::<Report>(conn)
+    }
+
+    pub fn get_reports(pool: web::Data<PgPool>, stck_id: i32) -> QueryResult<Vec<Report>> {
+        let conn = &pool.get().unwrap();
+
+        let selection = (
+            balance::stock_id,
+            balance::year,
+            balance::cash,
+            balance::receivables,
+            balance::inventories,
+            balance::fixed_asset,
+            balance::quick_asset,
+            balance::current_asset,
+            balance::tangible_asset,
+            balance::st_liabilities,
+            balance::lt_liabilities,
+            balance::total_liabilities,
+            balance::net_cash_asset,
+            balance::net_quick_asset,
+            balance::net_current_asset,
+            balance::net_tangible_asset,
+            balance::share_outstanding,
+            income::revenue,
+            income::gross_profit,
+            income::operating_profit,
+            income::net_profit,
+            income::customer_cashflow,
+            income::operating_cashflow,
+            income::investing_cashflow,
+            income::financing_cashflow,
+            income::total_cashflow,
+        );
+
+        balance::table
             .inner_join(
                 income::table.on(balance::stock_id
                     .eq(stck_id)
@@ -87,8 +131,7 @@ impl Report {
                     .and(balance::year.eq(income::year))),
             )
             .select(selection)
-            .get_results::<Report>(conn);
-
-        data
+            .order(balance::year.desc())
+            .get_results::<Report>(conn)
     }
 }
