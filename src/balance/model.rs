@@ -99,14 +99,7 @@ impl Balance {
             .get_result::<Balance>(conn);
 
         match insert_result {
-            Ok(balance) => {
-                let identifier = ReportIdentifier {
-                    stock_id: balance.stock_id,
-                    year: balance.year,
-                };
-                Stock::create_ratios(pool, identifier);
-                format!("Balance Sheet created successfully")
-            }
+            Ok(balance) => format!("Balance Sheet created successfully"),
             Err(err) => format!("Error in inserting balance sheet: {:?}", err),
         }
     }

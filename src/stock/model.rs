@@ -55,16 +55,4 @@ impl Stock {
 
         (balance_data, income_data)
     }
-
-    pub fn create_ratios(pool: web::Data<PgPool>, identifier: ReportIdentifier) {
-        let balance_income_data = Stock::get_balance_and_income(pool.clone(), identifier.clone());
-
-        match balance_income_data {
-            (Ok(balance), Ok(income)) => {
-                PerShareRatios::create(pool.clone(), (balance.clone(), income.clone()));
-                ComparativeRatios::create(pool, (balance, income));
-            }
-            _ => println!("Skipped creating ratios {:?}", identifier),
-        }
-    }
 }

@@ -1,8 +1,7 @@
 use crate::db::PgPool;
 use crate::income::req;
-use crate::schema::income::*;
-use crate::stock::model::Stock;
 use crate::report::model::ReportIdentifier;
+use crate::schema::income::*;
 
 use actix_web::web;
 use diesel::{
@@ -84,15 +83,7 @@ impl Income {
             .get_result::<Income>(conn);
 
         match insert_result {
-            Ok(income) => {
-                let identifier = ReportIdentifier {
-                    stock_id: income.stock_id,
-                    year: income.year,
-                };
-                Stock::create_ratios(pool, identifier);
-
-                format!("Income Statement created successfully")
-            }
+            Ok(income) => format!("Income Statement created successfully"),
             Err(err) => format!("Error in creating Income Statement: {:?}", err),
         }
     }
