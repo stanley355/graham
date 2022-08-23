@@ -49,18 +49,6 @@ impl Balance {
         .get_result(conn)
     }
 
-    pub fn get(pool: web::Data<PgPool>, identifier: ReportIdentifier) -> QueryResult<Balance> {
-        let conn = &pool.get().unwrap();
-
-        table
-            .filter(
-                stock_id
-                    .eq(identifier.stock_id)
-                    .and(year.eq(identifier.year)),
-            )
-            .get_result::<Balance>(conn)
-    }
-
     pub fn add(
         pool: web::Data<PgPool>,
         body: web::Json<req::AddBalanceReq>,
