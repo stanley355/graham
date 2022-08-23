@@ -92,11 +92,14 @@ impl Report {
         );
 
         balance::table
-            .filter(balance::year.eq(identifier.year))
-            .inner_join(
-                income::table.on(balance::stock_id
+            .filter(
+                balance::stock_id
                     .eq(identifier.stock_id)
-                    .and(balance::stock_id.eq(identifier.stock_id))
+                    .and(balance::year.eq(identifier.year)),
+            )
+            .inner_join(
+                income::table.on(income::stock_id
+                    .eq(identifier.stock_id)
                     .and(balance::year.eq(income::year))),
             )
             .select(selection)
@@ -136,12 +139,8 @@ impl Report {
         );
 
         balance::table
-            .inner_join(
-                income::table.on(balance::stock_id
-                    .eq(stck_id)
-                    .and(balance::stock_id.eq(stck_id))
-                    .and(balance::year.eq(income::year))),
-            )
+            .filter(balance::stock_id.eq(stck_id))
+            .inner_join(income::table.on(income::stock_id.eq(stck_id)))
             .select(selection)
             .order(balance::year.desc())
             .get_results::<Report>(conn)
