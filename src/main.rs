@@ -21,6 +21,7 @@ async fn serve_web(address: String, pool: db::PgPool) -> std::io::Result<()> {
             .service(web::scope("/v1/balance").configure(balance::handler::route))
             .service(web::scope("/v1/income").configure(income::handler::route))
             .service(web::scope("/v1/reports").configure(report::handler::route))
+            .service(web::scope("/v1/ratios").configure(ratios::handler::route))
     })
     .bind(address)?
     .run()

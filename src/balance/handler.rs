@@ -19,13 +19,18 @@ async fn add_balance(pool: web::Data<PgPool>, body: web::Json<req::AddBalanceReq
             match balance_exist.unwrap() {
                 true => HttpResponse::BadRequest().body(format!("Error : Balance Sheet exists!")),
                 false => {
-                    let insert_result = model::Balance::add(pool, body, id);
-                    HttpResponse::Ok().body(insert_result)
+                    let new_balance = model::Balance::add(pool, body, id);
+                    match new_balance {
+                        Ok(balance) => HttpResponse::Ok().json(balance),
+                        Err(err) => {
+                            HttpResponse::InternalServerError().body(format!("Error : {:?}", err))
+                        }
+                    }
                 }
             }
         }
 
-        Err(err) => HttpResponse::BadRequest().body(format!("Error Stock ID {:?}", err)),
+        Err(err) => HttpResponse::BadRequest().body(format!("Error : {:?}", err)),
     }
 }
 

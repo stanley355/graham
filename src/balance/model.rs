@@ -2,7 +2,6 @@ use crate::balance::req;
 use crate::db::PgPool;
 use crate::report::model::ReportIdentifier;
 use crate::schema::balance::*;
-use crate::stock::model::Stock;
 
 use actix_web::web;
 use diesel::{
@@ -66,7 +65,7 @@ impl Balance {
         pool: web::Data<PgPool>,
         body: web::Json<req::AddBalanceReq>,
         stck_id: i32,
-    ) -> String {
+    ) -> QueryResult<Balance> {
         let conn = &pool.get().unwrap();
 
         let new_quick_asset = &body.cash + &body.receivables;
@@ -94,20 +93,8 @@ impl Balance {
             (&share_outstanding.eq(&body.share_outstanding)),
         );
 
-        let insert_result = diesel::insert_into(dsl::balance)
+        diesel::insert_into(dsl::balance)
             .values(data)
-            .get_result::<Balance>(conn);
-
-        match insert_result {
-            Ok(balance) => {
-                let identifier = ReportIdentifier {
-                    stock_id: balance.stock_id,
-                    year: balance.year,
-                };
-                Stock::create_ratios(pool, identifier);
-                format!("Balance Sheet created successfully")
-            }
-            Err(err) => format!("Error in inserting balance sheet: {:?}", err),
-        }
+            .get_result::<Balance>(conn)
     }
 }

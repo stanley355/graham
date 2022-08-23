@@ -1,4 +1,6 @@
+use crate::balance::model::Balance;
 use crate::db::PgPool;
+use crate::income::model::Income;
 use crate::schema::{balance, income};
 
 use actix_web::web;
@@ -44,6 +46,16 @@ pub struct Report {
 }
 
 impl Report {
+    pub fn get_balance_and_income(
+        pool: web::Data<PgPool>,
+        identifier: ReportIdentifier,
+    ) -> (QueryResult<Balance>, QueryResult<Income>) {
+        let balance = Balance::get(pool.clone(), identifier.clone());
+        let income = Income::get(pool, identifier);
+
+        (balance, income)
+    }
+
     pub fn get_report(
         pool: web::Data<PgPool>,
         identifier: ReportIdentifier,
