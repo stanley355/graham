@@ -1,6 +1,4 @@
-use crate::balance::model::Balance;
-use crate::income::model::Income;
-
+use crate::report::model::Report;
 use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
@@ -18,18 +16,18 @@ pub struct PerShareRatios {
 }
 
 impl PerShareRatios {
-    pub fn new(balance: Balance, income: Income) -> Self{
+    pub fn new(report: Report) -> Self{
         Self { 
-            stock_id: balance.stock_id, 
-            year: balance.year, 
-            cash_equity: balance.net_cash_asset as f32 / balance.share_outstanding as f32, 
-            quick_equity: balance.net_quick_asset as f32 / balance.share_outstanding as f32, 
-            current_equity: balance.net_current_asset as f32 / balance.share_outstanding as f32, 
-            tangible_equity: balance.net_tangible_asset as f32 / balance.share_outstanding as f32, 
-            gross_profit: income.gross_profit as f32 / balance.share_outstanding as f32, 
-            operating_profit: income.operating_profit as f32 / balance.share_outstanding as f32, 
-            net_profit: income.net_profit as f32 / balance.share_outstanding as f32, 
-            cashflow: income.total_cashflow as f32 / balance.share_outstanding as f32
+            stock_id: report.stock_id, 
+            year: report.year, 
+            cash_equity: report.net_cash_asset as f32 / report.share_outstanding as f32, 
+            quick_equity: report.net_quick_asset as f32 / report.share_outstanding as f32, 
+            current_equity: report.net_current_asset as f32 / report.share_outstanding as f32, 
+            tangible_equity: report.net_tangible_asset as f32 / report.share_outstanding as f32, 
+            gross_profit: report.gross_profit as f32 / report.share_outstanding as f32, 
+            operating_profit: report.operating_profit as f32 / report.share_outstanding as f32, 
+            net_profit: report.net_profit as f32 / report.share_outstanding as f32, 
+            cashflow: report.total_cashflow as f32 / report.share_outstanding as f32
         }
     }
 }

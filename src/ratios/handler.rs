@@ -17,14 +17,16 @@ async fn view_reports(pool: web::Data<PgPool>, param: web::Query<ReportParam>) -
                         year: year,
                     };
 
-                    let balance_and_income = Report::get_balance_and_income(pool, identifier);
+                    let report_result = Report::get_report(pool.clone(), identifier);
 
-                    match balance_and_income {
-                        (Ok(balance), Ok(income)) => {
-                            let ratios = Ratios::new(balance, income);
-                            HttpResponse::Ok().json(ratios)
+                    match report_result {
+                        Ok(report) => {
+                            let ratio = Ratios::new(report);
+                            HttpResponse::Ok().json(ratio)
                         }
-                        _ => HttpResponse::InternalServerError().body(format!("Server Error ")),
+                        Err(err) => {
+                            HttpResponse::InternalServerError().body(format!("Error {:?}", err))
+                        }
                     }
                 }
                 Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),

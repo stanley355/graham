@@ -1,6 +1,4 @@
-use crate::balance::model::Balance;
-use crate::income::model::Income;
-
+use crate::report::model::Report;
 use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
@@ -20,27 +18,27 @@ pub struct ComparativeRatios {
 }
 
 impl ComparativeRatios {
-    pub fn new(balance: Balance, income: Income) -> Self {
+    pub fn new(report: Report) -> Self {
         Self {
-            stock_id: balance.stock_id,
-            year: balance.year,
-            gross_profit_margin: (income.gross_profit as f32 / income.revenue as f32) * 100.0,
-            operating_profit_margin: (income.operating_profit as f32 / income.revenue as f32)
+            stock_id: report.stock_id,
+            year: report.year,
+            gross_profit_margin: (report.gross_profit as f32 / report.revenue as f32) * 100.0,
+            operating_profit_margin: (report.operating_profit as f32 / report.revenue as f32)
                 * 100.0,
-            net_profit_margin: (income.net_profit as f32 / income.revenue as f32) * 100.0,
-            current_asset_return: (income.net_profit as f32 / balance.net_current_asset as f32)
+            net_profit_margin: (report.net_profit as f32 / report.revenue as f32) * 100.0,
+            current_asset_return: (report.net_profit as f32 / report.net_current_asset as f32)
                 * 100.0,
-            tang_asset_return: (income.net_profit as f32 / balance.net_tangible_asset as f32)
+            tang_asset_return: (report.net_profit as f32 / report.net_tangible_asset as f32)
                 * 100.0,
-            total_liability_return: (income.net_profit as f32 / balance.total_liabilities as f32)
+            total_liability_return: (report.net_profit as f32 / report.total_liabilities as f32)
                 * 100.0,
-            revenue_receivable_return: (income.revenue as f32 / balance.receivables as f32) * 100.0,
-            revenue_inventory_return: (income.revenue as f32 / balance.inventories as f32) * 100.0,
-            current_asset_liabilities_return: (balance.current_asset as f32
-                / balance.st_liabilities as f32)
+            revenue_receivable_return: (report.revenue as f32 / report.receivables as f32) * 100.0,
+            revenue_inventory_return: (report.revenue as f32 / report.inventories as f32) * 100.0,
+            current_asset_liabilities_return: (report.current_asset as f32
+                / report.st_liabilities as f32)
                 * 100.0,
-            tang_asset_total_liabilities_return: (balance.tangible_asset as f32
-                / balance.total_liabilities as f32)
+            tang_asset_total_liabilities_return: (report.tangible_asset as f32
+                / report.total_liabilities as f32)
                 * 100.0,
         }
     }
