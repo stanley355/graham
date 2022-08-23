@@ -28,7 +28,7 @@ async fn view_reports(pool: web::Data<PgPool>, param: web::Query<ReportParam>) -
                 Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),
             }
         }
-        (Some(code), _) => {
+        (Some(code), None) => {
             let stock_id = Stock::get_id(pool.clone(), code);
 
             match stock_id {
