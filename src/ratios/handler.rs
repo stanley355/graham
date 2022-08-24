@@ -21,8 +21,28 @@ async fn view_reports(pool: web::Data<PgPool>, param: web::Query<ReportParam>) -
 
                     match report_result {
                         Ok(report) => {
-                            let ratio = Ratios::new(report);
+                            let ratio = Ratios::create(report);
                             HttpResponse::Ok().json(ratio)
+                        }
+                        Err(err) => {
+                            HttpResponse::InternalServerError().body(format!("Error {:?}", err))
+                        }
+                    }
+                }
+                Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),
+            }
+        }
+        (Some(code), None) => {
+            let stock_id = Stock::get_id(pool.clone(), code);
+
+            match stock_id {
+                Ok(id) => {
+                    let report_list_result = Report::get_reports(pool.clone(), id);
+
+                    match report_list_result {
+                        Ok(report_list) => {
+                            let ratio_list = Ratios::create_list(report_list);
+                            HttpResponse::Ok().json(ratio_list)
                         }
                         Err(err) => {
                             HttpResponse::InternalServerError().body(format!("Error {:?}", err))

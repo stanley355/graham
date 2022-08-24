@@ -10,7 +10,7 @@ pub struct Ratios {
 }
 
 impl Ratios {
-    pub fn new(report: Report) -> Self {
+    pub fn create(report: Report) -> Self {
         let ps_ratios = PerShareRatios::new(report.clone());
         let compar_ratios = ComparativeRatios::new(report);
 
@@ -18,5 +18,9 @@ impl Ratios {
             per_share_ratios: ps_ratios,
             comparative_ratios: compar_ratios,
         }
+    }
+
+    pub fn create_list(reports: Vec<Report>) -> Vec<Self> {
+        reports.into_iter().map(|r| Ratios::create(r)).collect()
     }
 }
