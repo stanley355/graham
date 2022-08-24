@@ -19,4 +19,8 @@ impl Ratios {
             comparative_ratios: compar_ratios,
         }
     }
+
+    pub fn create_list(reports: Vec<Report>) -> Vec<Self> {
+        reports.into_iter().map(|r| Ratios::create(r)).collect()
+    }
 }

@@ -32,6 +32,26 @@ async fn view_reports(pool: web::Data<PgPool>, param: web::Query<ReportParam>) -
                 Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),
             }
         }
+        (Some(code), None) => {
+            let stock_id = Stock::get_id(pool.clone(), code);
+
+            match stock_id {
+                Ok(id) => {
+                    let report_list_result = Report::get_reports(pool.clone(), id);
+
+                    match report_list_result {
+                        Ok(report_list) => {
+                            let ratio_list = Ratios::create_list(report_list);
+                            HttpResponse::Ok().json(ratio_list)
+                        }
+                        Err(err) => {
+                            HttpResponse::InternalServerError().body(format!("Error {:?}", err))
+                        }
+                    }
+                }
+                Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),
+            }
+        }
         _ => HttpResponse::BadRequest().body(format!("Missing Parameter: code, year")),
     }
 }
