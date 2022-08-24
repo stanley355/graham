@@ -21,7 +21,7 @@ async fn view_reports(pool: web::Data<PgPool>, param: web::Query<ReportParam>) -
 
                     match report_result {
                         Ok(report) => {
-                            let ratio = Ratios::new(report);
+                            let ratio = Ratios::create(report);
                             HttpResponse::Ok().json(ratio)
                         }
                         Err(err) => {

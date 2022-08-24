@@ -10,7 +10,7 @@ pub struct Ratios {
 }
 
 impl Ratios {
-    pub fn new(report: Report) -> Self {
+    pub fn create(report: Report) -> Self {
         let ps_ratios = PerShareRatios::new(report.clone());
         let compar_ratios = ComparativeRatios::new(report);
 
