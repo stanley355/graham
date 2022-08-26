@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
 pub struct GrowthRatios {
+    stock_id: i32,
+    year: i32,
     cast_growth: f32,
     st_liability_growth: f32,
     lt_liability_growth: f32,
@@ -12,21 +14,18 @@ pub struct GrowthRatios {
 
 impl GrowthRatios {
     pub fn create_yearly(reports: Vec<Report>) -> Vec<GrowthRatios> {
-        let mut yearly_growth: Vec<GrowthRatios> = Vec::new();
-        for (index, rep) in reports.iter().enumerate() {
-            if index == (&reports.len() - 2) {
-                break;
-            }
-
-            let new_ratio = GrowthRatios::create_ratios(&rep, &reports[index - 1]);
-            yearly_growth.push(new_ratio);
-        }
-
-        yearly_growth
+        reports
+            .iter()
+            .enumerate()
+            .filter(|rep| rep.0 != (reports.len() - 1))
+            .map(|rep| GrowthRatios::create_ratios(rep.1, &reports[rep.0 + 1]))
+            .collect()
     }
 
     pub fn create_ratios(current_report: &Report, next_report: &Report) -> Self {
         Self {
+            stock_id: current_report.stock_id,
+            year: current_report.year,
             cast_growth: GrowthRatios::count_growth(current_report.cash, next_report.cash),
             st_liability_growth: GrowthRatios::count_growth(
                 current_report.st_liabilities,
