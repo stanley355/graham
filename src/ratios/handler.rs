@@ -5,7 +5,7 @@ use crate::stock::model::Stock;
 use actix_web::{get, web, HttpResponse};
 
 #[get("/")]
-async fn view_reports(pool: web::Data<PgPool>, param: web::Query<ReportParam>) -> HttpResponse {
+async fn view_ratios(pool: web::Data<PgPool>, param: web::Query<ReportParam>) -> HttpResponse {
     match (param.code.clone(), param.year) {
         (Some(code), Some(year)) => {
             let stock_id = Stock::get_id(pool.clone(), code);
@@ -57,5 +57,5 @@ async fn view_reports(pool: web::Data<PgPool>, param: web::Query<ReportParam>) -
 }
 
 pub fn route(config: &mut web::ServiceConfig) {
-    config.service(view_reports);
+    config.service(view_ratios);
 }
