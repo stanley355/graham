@@ -12,6 +12,7 @@ mod ratios;
 mod schema;
 mod stock;
 mod report;
+mod analysis;
 
 async fn serve_web(address: String, pool: db::PgPool) -> std::io::Result<()> {
     HttpServer::new(move || {

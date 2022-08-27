@@ -1,7 +1,7 @@
 use crate::report::model::Report;
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ComparativeRatios {
     stock_id: i32,
     year: i32,

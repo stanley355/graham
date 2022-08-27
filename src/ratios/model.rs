@@ -3,7 +3,7 @@ use crate::report::model::Report;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Ratios {
     pub per_share_ratios: PerShareRatios,
     pub comparative_ratios: ComparativeRatios,
