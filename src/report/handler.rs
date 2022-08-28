@@ -21,7 +21,7 @@ async fn view_reports(pool: web::Data<PgPool>, param: web::Query<ReportParam>) -
                 year: 0,
             };
 
-            Report::arry_http_response(pool, request)
+            Report::array_http_response(pool, request)
         }
         _ => HttpResponse::BadRequest().body(format!("Missing Parameter: code, year")),
     }
@@ -45,7 +45,7 @@ async fn view_analysis(pool: web::Data<PgPool>, param: web::Query<ReportParam>) 
                 year: 0,
             };
 
-            Report::arry_http_response(pool, request)
+            Report::array_http_response(pool, request)
         }
         _ => HttpResponse::BadRequest().body(format!("Missing Parameter: code, year")),
     }
@@ -69,7 +69,7 @@ async fn view_ratios(pool: web::Data<PgPool>, param: web::Query<ReportParam>) ->
                 year: 0,
             };
 
-            Report::arry_http_response(pool, request)
+            Report::array_http_response(pool, request)
         }
         _ => HttpResponse::BadRequest().body(format!("Missing Parameter: code, year")),
     }
@@ -88,7 +88,7 @@ async fn view_growth_ratios(
                 year: 0,
             };
 
-            Report::arry_http_response(pool, request)
+            Report::array_http_response(pool, request)
         }
         None => HttpResponse::BadRequest().body(format!("Missing Parameter: code")),
     }
