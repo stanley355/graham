@@ -23,13 +23,19 @@ impl fmt::Display for AnalysisStatus {
 pub struct Analysis {
     pub no_minus_balance: String,
     pub no_minus_income: String,
+    pub healthy_cashflow: String,
 }
 
 impl Analysis {
+    pub fn new_list(reports: Vec<Report>) -> Vec<Self> {
+        reports.into_iter().map(|rep| Analysis::new(rep)).collect()
+    }
+
     pub fn new(report: Report) -> Self {
         Analysis {
             no_minus_balance: Analysis::check_minus_balance(&report),
             no_minus_income: Analysis::check_minus_income(&report),
+            healthy_cashflow: Analysis::check_cashflow_health(&report),
         }
     }
 
@@ -64,6 +70,18 @@ impl Analysis {
             }
         } else {
             AnalysisStatus::Fail.to_string()
+        }
+    }
+
+    pub fn check_cashflow_health(report: &Report) -> String {
+        if report.total_cashflow > 0 {
+            if report.operating_cashflow > report.financing_cashflow {
+                AnalysisStatus::Pass.to_string()
+            } else {
+                AnalysisStatus::Fail.to_string()
+            }
+        } else {
+            AnalysisStatus::Mediocre.to_string()
         }
     }
 }
