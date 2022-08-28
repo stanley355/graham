@@ -1,6 +1,6 @@
 use crate::db::PgPool;
 use crate::schema::{balance, income};
-
+use crate::traits::report_response::ReportResponseTrait;
 use actix_web::web;
 use diesel::{
     BoolExpressionMethods, ExpressionMethods, JoinOnDsl, QueryDsl, QueryResult, RunQueryDsl,
@@ -42,6 +42,8 @@ pub struct Report {
     pub financing_cashflow: i64,
     pub total_cashflow: i64,
 }
+
+impl ReportResponseTrait for Report {}
 
 impl Report {
     pub fn get_report(

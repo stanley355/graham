@@ -3,32 +3,19 @@ use crate::db::PgPool;
 use crate::ratios::{growth_ratios::GrowthRatios, model::Ratios};
 use crate::report::{model::*, req::ReportParam};
 use crate::stock::model::Stock;
+use crate::traits::report_response::{ReportRequestParam, ReportResponseTrait, ReportType};
 use actix_web::{get, web, HttpResponse};
 
 #[get("/")]
 async fn view_reports(pool: web::Data<PgPool>, param: web::Query<ReportParam>) -> HttpResponse {
     match (param.code.clone(), param.year) {
         (Some(code), Some(year)) => {
-            let stock_id = Stock::get_id(pool.clone(), code);
-
-            match stock_id {
-                Ok(id) => {
-                    let identifier = ReportIdentifier {
-                        stock_id: id,
-                        year: year,
-                    };
-
-                    let report_result = Report::get_report(pool, identifier);
-
-                    match report_result {
-                        Ok(report) => HttpResponse::Ok().json(report),
-                        Err(err) => {
-                            HttpResponse::InternalServerError().body(format!("Error {:?}", err))
-                        }
-                    }
-                }
-                Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),
-            }
+            let request = ReportRequestParam {
+                report_type: ReportType::Normal,
+                code: code,
+                year: year
+            };
+            Report::single_response(pool, request)
         }
         (Some(code), None) => {
             let stock_id = Stock::get_id(pool.clone(), code);
@@ -90,7 +77,7 @@ async fn view_analysis(pool: web::Data<PgPool>, param: web::Query<ReportParam>) 
                         Ok(reports) => {
                             let analysis = Analysis::new_list(reports);
                             HttpResponse::Ok().json(analysis)
-                        },
+                        }
                         Err(err) => {
                             HttpResponse::InternalServerError().body(format!("Error {:?}", err))
                         }
