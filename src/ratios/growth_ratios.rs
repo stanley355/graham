@@ -1,4 +1,5 @@
 use crate::report::model::Report;
+use crate::traits::report_response::ReportHttpResponse;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -11,6 +12,8 @@ pub struct GrowthRatios {
     total_liability_growth: f32,
     net_profit_growth: f32,
 }
+
+impl ReportHttpResponse for GrowthRatios {}
 
 impl GrowthRatios {
     pub fn create_yearly(reports: Vec<Report>) -> Vec<GrowthRatios> {

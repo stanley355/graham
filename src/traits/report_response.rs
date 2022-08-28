@@ -19,8 +19,8 @@ pub struct ReportRequestParam {
     pub year: i32,
 }
 
-pub trait ReportResponseTrait {
-    fn single_response(pool: web::Data<PgPool>, request: ReportRequestParam) -> HttpResponse {
+pub trait ReportHttpResponse {
+    fn single_http_response(pool: web::Data<PgPool>, request: ReportRequestParam) -> HttpResponse {
         let stock_id = Stock::get_id(pool.clone(), request.code.clone());
 
         match stock_id {

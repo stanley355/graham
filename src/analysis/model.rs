@@ -1,4 +1,5 @@
 use crate::report::model::Report;
+use crate::traits::report_response::ReportHttpResponse;
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -25,6 +26,8 @@ pub struct Analysis {
     pub no_minus_income: String,
     pub healthy_cashflow: String,
 }
+
+impl ReportHttpResponse for Analysis {}
 
 impl Analysis {
     pub fn new_list(reports: Vec<Report>) -> Vec<Self> {
