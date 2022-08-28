@@ -22,12 +22,14 @@ impl fmt::Display for AnalysisStatus {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Analysis {
     pub no_minus_balance: String,
+    pub no_minus_income: String,
 }
 
 impl Analysis {
     pub fn new(report: Report) -> Self {
         Analysis {
             no_minus_balance: Analysis::check_minus_balance(&report),
+            no_minus_income: Analysis::check_minus_income(&report),
         }
     }
 
@@ -43,6 +45,22 @@ impl Analysis {
                 AnalysisStatus::Pass.to_string()
             } else {
                 AnalysisStatus::Mediocre.to_string()
+            }
+        } else {
+            AnalysisStatus::Fail.to_string()
+        }
+    }
+
+    pub fn check_minus_income(report: &Report) -> String {
+        if (report.revenue > 0)
+            | (report.gross_profit > 0)
+            | (report.operating_profit > 0)
+            | (report.net_profit > 0)
+        {
+            if report.operating_profit > report.net_profit {
+                AnalysisStatus::Pass.to_string()
+            } else {
+                AnalysisStatus::Fail.to_string()
             }
         } else {
             AnalysisStatus::Fail.to_string()
