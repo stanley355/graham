@@ -1,8 +1,5 @@
-use crate::analysis::model::Analysis;
 use crate::db::PgPool;
-use crate::ratios::{growth_ratios::GrowthRatios, model::Ratios};
 use crate::report::{model::*, req::ReportParam};
-use crate::stock::model::Stock;
 use crate::traits::report_response::{ReportHttpResponse, ReportRequestParam, ReportType};
 use actix_web::{get, web, HttpResponse};
 
@@ -18,21 +15,13 @@ async fn view_reports(pool: web::Data<PgPool>, param: web::Query<ReportParam>) -
             Report::single_http_response(pool, request)
         }
         (Some(code), None) => {
-            let stock_id = Stock::get_id(pool.clone(), code);
+            let request = ReportRequestParam {
+                report_type: ReportType::Normal,
+                code: code,
+                year: 0,
+            };
 
-            match stock_id {
-                Ok(id) => {
-                    let report_results = Report::get_reports(pool, id);
-
-                    match report_results {
-                        Ok(reports) => HttpResponse::Ok().json(reports),
-                        Err(err) => {
-                            HttpResponse::InternalServerError().body(format!("Error {:?}", err))
-                        }
-                    }
-                }
-                Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),
-            }
+            Report::arry_http_response(pool, request)
         }
         _ => HttpResponse::BadRequest().body(format!("Missing Parameter: code, year")),
     }
@@ -50,24 +39,13 @@ async fn view_analysis(pool: web::Data<PgPool>, param: web::Query<ReportParam>) 
             Report::single_http_response(pool, request)
         }
         (Some(code), None) => {
-            let stock_id = Stock::get_id(pool.clone(), code);
+            let request = ReportRequestParam {
+                report_type: ReportType::Analysis,
+                code: code,
+                year: 0,
+            };
 
-            match stock_id {
-                Ok(id) => {
-                    let report_results = Report::get_reports(pool, id);
-
-                    match report_results {
-                        Ok(reports) => {
-                            let analysis = Analysis::new_list(reports);
-                            HttpResponse::Ok().json(analysis)
-                        }
-                        Err(err) => {
-                            HttpResponse::InternalServerError().body(format!("Error {:?}", err))
-                        }
-                    }
-                }
-                Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),
-            }
+            Report::arry_http_response(pool, request)
         }
         _ => HttpResponse::BadRequest().body(format!("Missing Parameter: code, year")),
     }
@@ -85,24 +63,13 @@ async fn view_ratios(pool: web::Data<PgPool>, param: web::Query<ReportParam>) ->
             Report::single_http_response(pool, request)
         }
         (Some(code), None) => {
-            let stock_id = Stock::get_id(pool.clone(), code);
+            let request = ReportRequestParam {
+                report_type: ReportType::Ratios,
+                code: code,
+                year: 0,
+            };
 
-            match stock_id {
-                Ok(id) => {
-                    let report_list_result = Report::get_reports(pool.clone(), id);
-
-                    match report_list_result {
-                        Ok(report_list) => {
-                            let ratio_list = Ratios::create_list(report_list);
-                            HttpResponse::Ok().json(ratio_list)
-                        }
-                        Err(err) => {
-                            HttpResponse::InternalServerError().body(format!("Error {:?}", err))
-                        }
-                    }
-                }
-                Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),
-            }
+            Report::arry_http_response(pool, request)
         }
         _ => HttpResponse::BadRequest().body(format!("Missing Parameter: code, year")),
     }
@@ -115,23 +82,13 @@ async fn view_growth_ratios(
 ) -> HttpResponse {
     match param.code.clone() {
         Some(code) => {
-            let stock_id = Stock::get_id(pool.clone(), code);
+            let request = ReportRequestParam {
+                report_type: ReportType::GrowthRatios,
+                code: code,
+                year: 0,
+            };
 
-            match stock_id {
-                Ok(id) => {
-                    let report_results = Report::get_reports(pool.clone(), id);
-
-                    match report_results {
-                        Ok(reports) => {
-                            HttpResponse::Ok().json(GrowthRatios::create_yearly(reports))
-                        }
-                        Err(err) => {
-                            HttpResponse::InternalServerError().body(format!("Error {:?}", err))
-                        }
-                    }
-                }
-                Err(err) => HttpResponse::BadRequest().body(format!("Error {:?}", err)),
-            }
+            Report::arry_http_response(pool, request)
         }
         None => HttpResponse::BadRequest().body(format!("Missing Parameter: code")),
     }
