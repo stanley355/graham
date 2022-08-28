@@ -5,14 +5,14 @@ use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
 use std::env;
 
+mod analysis;
 mod balance;
 mod db;
 mod income;
 mod ratios;
+mod report;
 mod schema;
 mod stock;
-mod report;
-mod analysis;
 
 async fn serve_web(address: String, pool: db::PgPool) -> std::io::Result<()> {
     HttpServer::new(move || {
@@ -22,7 +22,6 @@ async fn serve_web(address: String, pool: db::PgPool) -> std::io::Result<()> {
             .service(web::scope("/v1/balance").configure(balance::handler::route))
             .service(web::scope("/v1/income").configure(income::handler::route))
             .service(web::scope("/v1/reports").configure(report::handler::route))
-            .service(web::scope("/v1/ratios").configure(ratios::handler::route))
     })
     .bind(address)?
     .run()
