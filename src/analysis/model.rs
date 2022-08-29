@@ -2,40 +2,26 @@ use crate::ratios::model::Ratios;
 use crate::report::model::Report;
 use crate::traits::report_response::ReportHttpResponse;
 use serde::{Deserialize, Serialize};
-use std::fmt;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 pub enum AnalysisStatus {
+    Wonderful,
     Pass,
     Mediocre,
     Fail,
 }
 
-impl fmt::Display for AnalysisStatus {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            AnalysisStatus::Pass => write!(f, "Pass"),
-            AnalysisStatus::Mediocre => write!(f, "Mediocre"),
-            AnalysisStatus::Fail => write!(f, "Fail"),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct AnalysisRatio {
-    pub status: String,
-    pub ratio: f32,
-}
-
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Analysis {
-    pub stock_id:i32,
-    pub year:i32,
-    pub no_minus_balance: String,
-    pub no_minus_income: String,
-    pub healthy_cashflow: String,
-    pub curr_asset_vs_st_liability: AnalysisRatio,
-    pub fixed_asset_vs_lt_liability: AnalysisRatio,
+    pub stock_id: i32,
+    pub year: i32,
+    pub no_minus_balance: AnalysisStatus,
+    pub no_minus_income: AnalysisStatus,
+    pub healthy_cashflow: AnalysisStatus,
+    pub curr_asset_vs_st_liability: AnalysisStatus,
+    pub fixed_asset_vs_lt_liability: AnalysisStatus,
+    pub revenue_receivable_ratio: AnalysisStatus,
+    pub revenue_inventory_ratio: AnalysisStatus,
 }
 
 impl ReportHttpResponse for Analysis {}
@@ -58,12 +44,20 @@ impl Analysis {
                 ratios.comparative_ratios.current_asset_liabilities_return,
             ),
             fixed_asset_vs_lt_liability: Analysis::check_asset_ratio(
-                ratios.comparative_ratios.tang_asset_total_liabilities_return,
+                ratios
+                    .comparative_ratios
+                    .tang_asset_total_liabilities_return,
+            ),
+            revenue_receivable_ratio: Analysis::check_revenue_ratio(
+                ratios.comparative_ratios.revenue_receivable_return,
+            ),
+            revenue_inventory_ratio: Analysis::check_revenue_ratio(
+                ratios.comparative_ratios.revenue_inventory_return,
             ),
         }
     }
 
-    pub fn check_minus_balance(report: &Report) -> String {
+    pub fn check_minus_balance(report: &Report) -> AnalysisStatus {
         // TODO: For non IT company, adjust if inventories and
         // fixed_asset is less than 0 then fail
         if (report.cash > 0)
@@ -72,61 +66,64 @@ impl Analysis {
             | (report.net_tangible_asset > 0)
         {
             if (report.net_cash_asset > 0) && (report.net_quick_asset > 0) {
-                AnalysisStatus::Pass.to_string()
+                AnalysisStatus::Pass
             } else {
-                AnalysisStatus::Mediocre.to_string()
+                AnalysisStatus::Mediocre
             }
         } else {
-            AnalysisStatus::Fail.to_string()
+            AnalysisStatus::Fail
         }
     }
 
-    pub fn check_minus_income(report: &Report) -> String {
+    pub fn check_minus_income(report: &Report) -> AnalysisStatus {
         if (report.revenue > 0)
             | (report.gross_profit > 0)
             | (report.operating_profit > 0)
             | (report.net_profit > 0)
         {
             if report.operating_profit > report.net_profit {
-                AnalysisStatus::Pass.to_string()
+                AnalysisStatus::Pass
             } else {
-                AnalysisStatus::Fail.to_string()
+                AnalysisStatus::Fail
             }
         } else {
-            AnalysisStatus::Fail.to_string()
+            AnalysisStatus::Fail
         }
     }
 
-    pub fn check_cashflow_health(report: &Report) -> String {
+    pub fn check_cashflow_health(report: &Report) -> AnalysisStatus {
         if report.total_cashflow > 0 {
             if report.operating_cashflow > report.financing_cashflow {
-                AnalysisStatus::Pass.to_string()
+                AnalysisStatus::Pass
             } else {
-                AnalysisStatus::Fail.to_string()
+                AnalysisStatus::Fail
             }
         } else {
-            AnalysisStatus::Mediocre.to_string()
+            AnalysisStatus::Mediocre
         }
     }
 
-    pub fn check_asset_ratio(ratio: f32) -> AnalysisRatio {
+    pub fn check_asset_ratio(ratio: f32) -> AnalysisStatus {
         if ratio > 0.0 {
             if ratio > 75.0 {
-                AnalysisRatio {
-                    status: AnalysisStatus::Pass.to_string(),
-                    ratio: ratio,
-                }
+                AnalysisStatus::Pass
             } else {
-                AnalysisRatio {
-                    status: AnalysisStatus::Mediocre.to_string(),
-                    ratio: ratio,
-                }
+                AnalysisStatus::Mediocre
             }
         } else {
-            AnalysisRatio {
-                status: AnalysisStatus::Fail.to_string(),
-                ratio: ratio,
+            AnalysisStatus::Fail
+        }
+    }
+
+    pub fn check_revenue_ratio(ratio: f32) -> AnalysisStatus {
+        if ratio > 100.0 {
+            if ratio > 400.0 {
+                AnalysisStatus::Wonderful
+            } else {
+                AnalysisStatus::Pass
             }
+        } else {
+            AnalysisStatus::Fail
         }
     }
 }
