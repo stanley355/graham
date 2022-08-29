@@ -27,6 +27,7 @@ pub struct Analysis {
     pub net_profit_margin: AnalysisStatus,
     pub curr_asset_return: AnalysisStatus,
     pub tangible_asset_return: AnalysisStatus,
+    pub liability_return: AnalysisStatus,
 }
 
 impl ReportHttpResponse for Analysis {}
@@ -80,6 +81,9 @@ impl Analysis {
                 "Tangible",
                 &report.net_tangible_asset,
                 ratios.comparative_ratios.tang_asset_return,
+            ),
+            liability_return: Analysis::check_liability_return(
+                ratios.comparative_ratios.total_liability_return,
             ),
         }
     }
@@ -214,6 +218,22 @@ impl Analysis {
             } else {
                 AnalysisStatus::Fail
             }
+        }
+    }
+
+    pub fn check_liability_return(ratio: f32) -> AnalysisStatus {
+        if ratio > 10.0 {
+            if ratio > 20.0 {
+                if ratio > 40.0 {
+                    AnalysisStatus::Wonderful
+                } else {
+                    AnalysisStatus::Pass
+                }
+            } else {
+                AnalysisStatus::Mediocre
+            }
+        } else {
+            AnalysisStatus::Fail
         }
     }
 }
