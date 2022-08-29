@@ -25,6 +25,8 @@ pub struct Analysis {
     pub gross_profit_margin: AnalysisStatus,
     pub operating_profit_margin: AnalysisStatus,
     pub net_profit_margin: AnalysisStatus,
+    pub curr_asset_return: AnalysisStatus,
+    pub tangible_asset_return: AnalysisStatus,
 }
 
 impl ReportHttpResponse for Analysis {}
@@ -68,6 +70,16 @@ impl Analysis {
             net_profit_margin: Analysis::check_margin_ratio(
                 "Net",
                 ratios.comparative_ratios.net_profit_margin,
+            ),
+            curr_asset_return: Analysis::check_asset_return(
+                "Current",
+                &report.net_tangible_asset,
+                ratios.comparative_ratios.current_asset_return,
+            ),
+            tangible_asset_return: Analysis::check_asset_return(
+                "Tangible",
+                &report.net_tangible_asset,
+                ratios.comparative_ratios.tang_asset_return,
             ),
         }
     }
@@ -164,6 +176,43 @@ impl Analysis {
                 } else {
                     AnalysisStatus::Fail
                 }
+            }
+        }
+    }
+
+    pub fn check_asset_return(asset_type: &str, tang_asset: &i64, ratio: f32) -> AnalysisStatus {
+        const ONE_TRILLION: i64 = 1000000000000;
+        if tang_asset > &ONE_TRILLION {
+            if ratio > 0.0 {
+                if ratio > 5.0 {
+                    if ratio > 10.0 {
+                        AnalysisStatus::Wonderful
+                    } else {
+                        AnalysisStatus::Pass
+                    }
+                } else {
+                    AnalysisStatus::Mediocre
+                }
+            } else {
+                AnalysisStatus::Fail
+            }
+        } else {
+            if ratio > 5.0 {
+                if ratio > 10.0 {
+                    if ratio > 20.0 {
+                        AnalysisStatus::Wonderful
+                    } else {
+                        AnalysisStatus::Pass
+                    }
+                } else {
+                    match asset_type {
+                        "Current" => AnalysisStatus::Fail,
+                        "Tangible" => AnalysisStatus::Mediocre,
+                        _ => AnalysisStatus::Mediocre,
+                    }
+                }
+            } else {
+                AnalysisStatus::Fail
             }
         }
     }
