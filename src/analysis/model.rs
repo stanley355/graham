@@ -22,6 +22,9 @@ pub struct Analysis {
     pub fixed_asset_vs_lt_liability: AnalysisStatus,
     pub revenue_receivable_ratio: AnalysisStatus,
     pub revenue_inventory_ratio: AnalysisStatus,
+    pub gross_profit_margin: AnalysisStatus,
+    pub operating_profit_margin: AnalysisStatus,
+    pub net_profit_margin: AnalysisStatus,
 }
 
 impl ReportHttpResponse for Analysis {}
@@ -53,6 +56,18 @@ impl Analysis {
             ),
             revenue_inventory_ratio: Analysis::check_revenue_ratio(
                 ratios.comparative_ratios.revenue_inventory_return,
+            ),
+            gross_profit_margin: Analysis::check_margin_ratio(
+                "Gross",
+                ratios.comparative_ratios.gross_profit_margin,
+            ),
+            operating_profit_margin: Analysis::check_margin_ratio(
+                "Operating",
+                ratios.comparative_ratios.operating_profit_margin,
+            ),
+            net_profit_margin: Analysis::check_margin_ratio(
+                "Net",
+                ratios.comparative_ratios.net_profit_margin,
             ),
         }
     }
@@ -124,6 +139,32 @@ impl Analysis {
             }
         } else {
             AnalysisStatus::Fail
+        }
+    }
+
+    pub fn check_margin_ratio(margin_type: &str, ratio: f32) -> AnalysisStatus {
+        if ratio > 20.0 {
+            AnalysisStatus::Wonderful
+        } else {
+            if ratio > 10.0 {
+                match margin_type {
+                    "Gross" => AnalysisStatus::Pass,
+                    "Operating" => AnalysisStatus::Pass,
+                    "Net" => AnalysisStatus::Wonderful,
+                    _ => AnalysisStatus::Mediocre,
+                }
+            } else {
+                if ratio > 5.0 {
+                    match margin_type {
+                        "Gross" => AnalysisStatus::Fail,
+                        "Operating" => AnalysisStatus::Fail,
+                        "Net" => AnalysisStatus::Pass,
+                        _ => AnalysisStatus::Mediocre,
+                    }
+                } else {
+                    AnalysisStatus::Fail
+                }
+            }
         }
     }
 }
