@@ -29,10 +29,13 @@ pub struct AnalysisRatio {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Analysis {
+    pub stock_id:i32,
+    pub year:i32,
     pub no_minus_balance: String,
     pub no_minus_income: String,
     pub healthy_cashflow: String,
-    pub curr_asset_vs_curr_liability: AnalysisRatio,
+    pub curr_asset_vs_st_liability: AnalysisRatio,
+    pub fixed_asset_vs_lt_liability: AnalysisRatio,
 }
 
 impl ReportHttpResponse for Analysis {}
@@ -46,11 +49,16 @@ impl Analysis {
         let ratios = Ratios::create(report.clone());
 
         Analysis {
+            stock_id: report.stock_id.clone(),
+            year: report.year.clone(),
             no_minus_balance: Analysis::check_minus_balance(&report),
             no_minus_income: Analysis::check_minus_income(&report),
             healthy_cashflow: Analysis::check_cashflow_health(&report),
-            curr_asset_vs_curr_liability: Analysis::check_asset_ratio(
+            curr_asset_vs_st_liability: Analysis::check_asset_ratio(
                 ratios.comparative_ratios.current_asset_liabilities_return,
+            ),
+            fixed_asset_vs_lt_liability: Analysis::check_asset_ratio(
+                ratios.comparative_ratios.tang_asset_total_liabilities_return,
             ),
         }
     }
@@ -103,7 +111,7 @@ impl Analysis {
 
     pub fn check_asset_ratio(ratio: f32) -> AnalysisRatio {
         if ratio > 0.0 {
-            if ratio > 50.0 {
+            if ratio > 75.0 {
                 AnalysisRatio {
                     status: AnalysisStatus::Pass.to_string(),
                     ratio: ratio,
