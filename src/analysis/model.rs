@@ -1,3 +1,4 @@
+use crate::ratios::model::Ratios;
 use crate::report::model::Report;
 use crate::traits::report_response::ReportHttpResponse;
 use serde::{Deserialize, Serialize};
@@ -21,10 +22,17 @@ impl fmt::Display for AnalysisStatus {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct AnalysisRatio {
+    pub status: String,
+    pub ratio: f32,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Analysis {
     pub no_minus_balance: String,
     pub no_minus_income: String,
     pub healthy_cashflow: String,
+    pub curr_asset_vs_curr_liability: AnalysisRatio,
 }
 
 impl ReportHttpResponse for Analysis {}
@@ -35,10 +43,15 @@ impl Analysis {
     }
 
     pub fn new(report: Report) -> Self {
+        let ratios = Ratios::create(report.clone());
+
         Analysis {
             no_minus_balance: Analysis::check_minus_balance(&report),
             no_minus_income: Analysis::check_minus_income(&report),
             healthy_cashflow: Analysis::check_cashflow_health(&report),
+            curr_asset_vs_curr_liability: Analysis::check_asset_ratio(
+                ratios.comparative_ratios.current_asset_liabilities_return,
+            ),
         }
     }
 
@@ -85,6 +98,27 @@ impl Analysis {
             }
         } else {
             AnalysisStatus::Mediocre.to_string()
+        }
+    }
+
+    pub fn check_asset_ratio(ratio: f32) -> AnalysisRatio {
+        if ratio > 0.0 {
+            if ratio > 50.0 {
+                AnalysisRatio {
+                    status: AnalysisStatus::Pass.to_string(),
+                    ratio: ratio,
+                }
+            } else {
+                AnalysisRatio {
+                    status: AnalysisStatus::Mediocre.to_string(),
+                    ratio: ratio,
+                }
+            }
+        } else {
+            AnalysisRatio {
+                status: AnalysisStatus::Fail.to_string(),
+                ratio: ratio,
+            }
         }
     }
 }

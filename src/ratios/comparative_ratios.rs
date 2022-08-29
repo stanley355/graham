@@ -3,18 +3,18 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ComparativeRatios {
-    stock_id: i32,
-    year: i32,
-    gross_profit_margin: f32,
-    operating_profit_margin: f32,
-    net_profit_margin: f32,
-    current_asset_return: f32,
-    tang_asset_return: f32,
-    total_liability_return: f32,
-    revenue_receivable_return: f32,
-    revenue_inventory_return: f32,
-    current_asset_liabilities_return: f32,
-    tang_asset_total_liabilities_return: f32,
+    pub stock_id: i32,
+    pub year: i32,
+    pub gross_profit_margin: f32,
+    pub operating_profit_margin: f32,
+    pub net_profit_margin: f32,
+    pub current_asset_return: f32,
+    pub tang_asset_return: f32,
+    pub total_liability_return: f32,
+    pub revenue_receivable_return: f32,
+    pub revenue_inventory_return: f32,
+    pub current_asset_liabilities_return: f32,
+    pub tang_asset_total_liabilities_return: f32,
 }
 
 impl ComparativeRatios {
