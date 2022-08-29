@@ -1,13 +1,15 @@
 use crate::ratios::{comparative_ratios::ComparativeRatios, per_share_ratios::PerShareRatios};
 use crate::report::model::Report;
-
+use crate::traits::report_response::ReportHttpResponse;
 use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Ratios {
     pub per_share_ratios: PerShareRatios,
     pub comparative_ratios: ComparativeRatios,
 }
+
+impl ReportHttpResponse for Ratios {}
 
 impl Ratios {
     pub fn create(report: Report) -> Self {
