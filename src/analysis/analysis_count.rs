@@ -3,10 +3,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct AnalysisCount {
-    wonderful: i32,
-    pass: i32,
-    mediocre: i32,
-    fail: i32,
+    pub wonderful: i32,
+    pub pass: i32,
+    pub mediocre: i32,
+    pub fail: i32,
 }
 
 impl AnalysisCount {
