@@ -1,4 +1,4 @@
-use crate::ratios::{model::Ratios, per_share_ratios::PerShareRatios};
+use crate::ratios::model::Ratios;
 use crate::report::model::Report;
 use crate::traits::report_response::ReportHttpResponse;
 use serde::{Deserialize, Serialize};
@@ -28,7 +28,6 @@ pub struct Analysis {
     pub curr_asset_return: AnalysisStatus,
     pub tangible_asset_return: AnalysisStatus,
     pub liability_return: AnalysisStatus,
-    pub per_share_ratios: PerShareRatios
 }
 
 impl ReportHttpResponse for Analysis {}
@@ -86,7 +85,6 @@ impl Analysis {
             liability_return: Analysis::check_liability_return(
                 ratios.comparative_ratios.total_liability_return,
             ),
-            per_share_ratios: PerShareRatios::new(report)
         }
     }
 

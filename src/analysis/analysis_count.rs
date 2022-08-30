@@ -10,7 +10,7 @@ pub struct AnalysisCount {
 }
 
 impl AnalysisCount {
-    pub fn new(analysis: Analysis) -> Self {
+    pub fn new(analysis: &Analysis) -> Self {
         let analysis_array = AnalysisCount::create_analysis_array(&analysis);
 
         let mut count = AnalysisCount {

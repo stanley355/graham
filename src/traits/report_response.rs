@@ -1,3 +1,4 @@
+use crate::analysis::margin_of_safety::MarginOfSafety;
 use crate::analysis::model::Analysis;
 use crate::db::PgPool;
 use crate::ratios::{growth_ratios::GrowthRatios, model::Ratios};
@@ -10,6 +11,7 @@ pub enum ReportType {
     Analysis,
     Ratios,
     GrowthRatios,
+    MarginOfSafety,
 }
 
 pub struct ReportRequestParam {
@@ -41,7 +43,7 @@ pub trait ReportHttpResponse {
                             let ratio = Ratios::create(report);
                             HttpResponse::Ok().json(ratio)
                         }
-                        ReportType::GrowthRatios => HttpResponse::Ok()
+                        _ => HttpResponse::Ok()
                             .body("Growth Ratios only available for multi reponse"),
                     },
                     Err(err) => {
@@ -74,6 +76,13 @@ pub trait ReportHttpResponse {
                         ReportType::GrowthRatios => {
                             let growth_ratios = GrowthRatios::create_yearly(reports);
                             HttpResponse::Ok().json(growth_ratios)
+                        }
+                        ReportType::MarginOfSafety => {
+                            let ratios = Ratios::create_list(reports.clone());
+                            let analysis = Analysis::new_list(reports);
+                            let mos = MarginOfSafety::new_list(ratios, analysis);
+
+                            HttpResponse::Ok().json(mos)
                         }
                     },
                     Err(err) => {
