@@ -52,7 +52,7 @@ async fn view_analysis(pool: web::Data<PgPool>, param: web::Query<ReportParam>) 
 }
 
 #[get("/analysis/price")]
-async fn view_margin_of_safety(
+async fn view_price_analysis(
     pool: web::Data<PgPool>,
     param: web::Query<ReportParam>,
 ) -> HttpResponse {
@@ -60,6 +60,25 @@ async fn view_margin_of_safety(
         Some(code) => {
             let request = ReportRequestParam {
                 report_type: ReportType::PriceAnalysis,
+                code: code,
+                year: 0,
+            };
+
+            Report::array_http_response(pool, request)
+        }
+        None => HttpResponse::BadRequest().body(format!("Missing Parameter: code")),
+    }
+}
+
+#[get("/analysis/price/avg")]
+async fn view_price_analysis_avg(
+    pool: web::Data<PgPool>,
+    param: web::Query<ReportParam>,
+) -> HttpResponse {
+    match param.code.clone() {
+        Some(code) => {
+            let request = ReportRequestParam {
+                report_type: ReportType::PriceAnalysisAvg,
                 code: code,
                 year: 0,
             };
@@ -119,5 +138,6 @@ pub fn route(config: &mut web::ServiceConfig) {
         .service(view_analysis)
         .service(view_ratios)
         .service(view_growth_ratios)
-        .service(view_margin_of_safety);
+        .service(view_price_analysis)
+        .service(view_price_analysis_avg);
 }

@@ -1,5 +1,6 @@
-use crate::analysis::price_analysis::PriceAnalysis;
 use crate::analysis::model::Analysis;
+use crate::analysis::price_analysis::PriceAnalysis;
+use crate::analysis::price_analysis_avg::PriceAnalysisAverage;
 use crate::db::PgPool;
 use crate::ratios::{growth_ratios::GrowthRatios, model::Ratios};
 use crate::report::model::*;
@@ -12,6 +13,7 @@ pub enum ReportType {
     Ratios,
     GrowthRatios,
     PriceAnalysis,
+    PriceAnalysisAvg,
 }
 
 pub struct ReportRequestParam {
@@ -80,9 +82,17 @@ pub trait ReportHttpResponse {
                         ReportType::PriceAnalysis => {
                             let ratios = Ratios::create_list(reports.clone());
                             let analysis = Analysis::new_list(reports);
-                            let mos = PriceAnalysis::new_list(ratios, analysis);
+                            let price_analysis = PriceAnalysis::new_list(ratios, analysis);
 
-                            HttpResponse::Ok().json(mos)
+                            HttpResponse::Ok().json(price_analysis)
+                        }
+                        ReportType::PriceAnalysisAvg => {
+                            let ratios = Ratios::create_list(reports.clone());
+                            let analysis = Analysis::new_list(reports);
+                            let price_analysis = PriceAnalysis::new_list(ratios, analysis);
+                            let price_analysis_avg = PriceAnalysisAverage::count(price_analysis);
+
+                            HttpResponse::Ok().json(price_analysis_avg)
                         }
                     },
                     Err(err) => {
