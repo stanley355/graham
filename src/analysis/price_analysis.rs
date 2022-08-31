@@ -4,13 +4,13 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct PriceAnalysis {
-    stock_id: i32,
-    year: i32,
-    asset_price: f32,
-    eps: f32,
-    price_limit: f32,
-    safety_price_limit: f32,
-    analysis_count: AnalysisCount,
+    pub stock_id: i32,
+    pub year: i32,
+    pub asset_price: f32,
+    pub eps: f32,
+    pub price_limit: f32,
+    pub safety_price_limit: f32,
+    pub analysis_count: AnalysisCount,
 }
 
 impl PriceAnalysis {
