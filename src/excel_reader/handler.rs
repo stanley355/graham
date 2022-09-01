@@ -11,7 +11,8 @@ pub struct ExcelParam {
 #[post("/")]
 async fn read_file(pool: web::Data<PgPool>, param: web::Query<ExcelParam>) -> HttpResponse {
     let file_path = &param.file;
-    ExcelSheet::migrate_balance(pool, file_path, "Sheet1");
+    // ExcelSheet::migrate_balance(pool.clone(), file_path, "Sheet1");
+    ExcelSheet::migrate_income(pool, file_path, "Sheet1");
 
     HttpResponse::Ok().body("Done")
 }
