@@ -8,6 +8,7 @@ edition = "2021"
 
 [dependencies]
 actix-web = { version = "4", features = ["openssl"] }
+calamine = "0.18.0"
 dotenv = "0.15"
 diesel = { version = "1.4.4", features = ["postgres", "r2d2"] }
 openssl = "0.10"
