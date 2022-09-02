@@ -85,4 +85,38 @@ impl Balance {
             .values(data)
             .get_result::<Balance>(conn)
     }
+
+    pub fn update(
+        pool: web::Data<PgPool>,
+        body: web::Json<req::UpdateBalanceReq>,
+    ) -> QueryResult<Balance> {
+        let conn = &pool.get().unwrap();
+
+        let new_quick_asset = &body.cash + &body.receivables;
+        let new_current_asset = &new_quick_asset + &body.inventories;
+        let new_tangible_asset = &new_current_asset + &body.fixed_asset;
+
+        let data = (
+            (cash.eq(body.cash)),
+            (receivables.eq(body.receivables)),
+            (inventories.eq(body.inventories)),
+            (fixed_asset.eq(body.fixed_asset)),
+            (quick_asset.eq(&new_quick_asset)),
+            (current_asset.eq(new_current_asset)),
+            (tangible_asset.eq(new_tangible_asset)),
+            (st_liabilities.eq(body.st_liabilities)),
+            (lt_liabilities.eq(body.lt_liabilities)),
+            (total_liabilities.eq(body.st_liabilities + body.lt_liabilities)),
+            (net_cash_asset.eq(body.cash - body.st_liabilities)),
+            (net_quick_asset.eq(new_quick_asset - body.st_liabilities)),
+            (net_current_asset.eq(new_current_asset - body.st_liabilities)),
+            (net_tangible_asset.eq(new_tangible_asset - body.st_liabilities - body.lt_liabilities)),
+            (share_outstanding.eq(body.share_outstanding)),
+        );
+
+        diesel::update(dsl::balance)
+            .filter(stock_id.eq(body.stock_id).and(year.eq(body.year)))
+            .set(data)
+            .get_result::<Balance>(conn)
+    }
 }
