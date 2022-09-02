@@ -1,6 +1,7 @@
 use crate::balance::{model::Balance, req::AddBalanceReq};
 use crate::db::PgPool;
 use crate::income::{model::Income, req::AddIncomeReq};
+use crate::report::model::ReportIdentifier;
 use crate::stock::model::Stock;
 use actix_web::web;
 use calamine::{open_workbook, DataType, Range, Reader, Xlsx, XlsxError};
@@ -46,16 +47,28 @@ impl ExcelSheet {
     }
 
     pub fn add_balance(pool: web::Data<PgPool>, body: web::Json<AddBalanceReq>) {
-        let stock_id = Stock::get_id(pool.clone(), body.code.clone());
+        let stock_id = Stock::get_id(pool.clone(), body.code.clone()).unwrap();
 
-        let balance_res = Balance::add(pool, body, stock_id.unwrap());
+        let identifier = ReportIdentifier {
+            stock_id: stock_id.clone(),
+            year: body.year,
+        };
 
-        match balance_res {
-            Ok(balance) => println!(
-                "Added balance with stock_id: {} and year: {}",
-                balance.stock_id, balance.year
-            ),
-            Err(_) => println!("Failed adding balance !"),
+        let balance_exist = Balance::check_existence(pool.clone(), identifier);
+
+        match balance_exist.unwrap() {
+            true => println!("Skipped adding existing balance !"),
+            false => {
+                let balance_res = Balance::add(pool, body, stock_id);
+
+                match balance_res {
+                    Ok(balance) => println!(
+                        "Added balance with stock_id: {} and year: {}",
+                        balance.stock_id, balance.year
+                    ),
+                    Err(_) => println!("Failed adding balance !"),
+                }
+            }
         }
     }
 
@@ -90,16 +103,28 @@ impl ExcelSheet {
     }
 
     pub fn add_income(pool: web::Data<PgPool>, body: web::Json<AddIncomeReq>) {
-        let stock_id = Stock::get_id(pool.clone(), body.code.clone());
+        let stock_id = Stock::get_id(pool.clone(), body.code.clone()).unwrap();
 
-        let income_res = Income::add(pool, body, stock_id.unwrap());
+        let identifier = ReportIdentifier {
+            stock_id: stock_id.clone(),
+            year: body.year,
+        };
 
-        match income_res {
-            Ok(income) => println!(
-                "Added income with stock_id: {} and year: {}",
-                income.stock_id, income.year
-            ),
-            Err(_) => println!("Failed adding income !"),
+        let income_exist = Income::check_existence(pool.clone(), identifier);
+
+        match income_exist.unwrap() {
+            true => println!("Skipped adding existing balance !"),
+            false => {
+                let income_res = Income::add(pool, body, stock_id);
+
+                match income_res {
+                    Ok(income) => println!(
+                        "Added income with stock_id: {} and year: {}",
+                        income.stock_id, income.year
+                    ),
+                    Err(_) => println!("Failed adding income !"),
+                }
+            }
         }
     }
 
